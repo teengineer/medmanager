@@ -1,0 +1,27 @@
+# Caddy auto-provisions HTTPS via Let's Encrypt for any public domain pointed at this server.
+# Set API_DOMAIN in deploy/.env (e.g. api.medmanager.example.com).
+
+{$API_DOMAIN} {
+    encode zstd gzip
+
+    @options method OPTIONS
+    respond @options 204
+
+    reverse_proxy api:8080 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

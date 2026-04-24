@@ -1,0 +1,18 @@
+{
+  "name": "medmanager",
+  "private": true,
+  "version": "0.0.0",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "api:dev": "dotnet run --project apps/api/MedManager.Api",
+    "api:test": "dotnet test apps/api/MedManager.Api.Tests",
+    "api:build": "dotnet build apps/api/MedManager.sln"
+  }
+}
