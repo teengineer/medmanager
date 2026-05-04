@@ -13,7 +13,7 @@ export default defineConfig({
       filename: "sw.ts",
       registerType: "autoUpdate",
       injectRegister: "auto",
-      includeAssets: ["favicon.svg", "icons/*.png"],
+      includeAssets: ["favicon.png", "icons/*.png"],
       manifest: {
         name: "MedManager",
         short_name: "MedManager",

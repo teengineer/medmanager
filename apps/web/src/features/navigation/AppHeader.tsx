@@ -179,5 +179,5 @@ function MenuItem({
 }
 
 function LogoMark() {
-  return <img src="/favicon.svg" alt="" className="size-8" />;
+  return <img src="/favicon.png" alt="" className="size-8" />;
 }
