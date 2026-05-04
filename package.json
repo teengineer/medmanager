@@ -11,8 +11,11 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck",
-    "api:dev": "dotnet run --project apps/api/MedManager.Api",
-    "api:test": "dotnet test apps/api/MedManager.Api.Tests",
-    "api:build": "dotnet build apps/api/MedManager.sln"
+    "test": "pnpm --filter @medmanager/api test",
+    "api:dev": "pnpm --filter @medmanager/api dev",
+    "api:test": "pnpm --filter @medmanager/api test",
+    "api:build": "pnpm --filter @medmanager/api build",
+    "api:migrate": "pnpm --filter @medmanager/api db:migrate",
+    "api:generate": "pnpm --filter @medmanager/api db:generate"
   }
 }

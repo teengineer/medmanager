@@ -17,7 +17,7 @@ export function AppHeader() {
       <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4">
         <Link to="/" className="flex items-center gap-2">
           <LogoMark />
-          <span className="text-lg font-bold tracking-tight text-brand">medmanager</span>
+          <span className="text-lg font-bold tracking-tight text-brand">MedManager</span>
         </Link>
 
         <nav className="ml-4 hidden flex-1 items-center gap-1 md:flex">

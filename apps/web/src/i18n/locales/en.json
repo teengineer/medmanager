@@ -87,7 +87,7 @@
   },
   "disclaimer": {
     "title": "Medical Disclaimer",
-    "body": "medmanager is a medicine inventory tool. It does not provide medical advice and is not intended for diagnosis or treatment. Consult your doctor before using any medicine.",
+    "body": "MedManager is a medicine inventory tool. It does not provide medical advice and is not intended for diagnosis or treatment. Consult your doctor before using any medicine.",
     "accept": "I understand and accept"
   },
   "legal": {
@@ -105,7 +105,7 @@
   },
   "about": {
     "title": "About",
-    "description": "medmanager is a personal app for tracking your household medicines. Open-source.",
+    "description": "MedManager is a personal app for tracking your household medicines. Open-source.",
     "source_code": "Source code"
   },
   "profile": {

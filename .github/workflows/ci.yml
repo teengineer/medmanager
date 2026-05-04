@@ -11,12 +11,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  web:
-    name: Web (Vite + React)
+  build-and-test:
+    name: Build + test (all)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -29,29 +26,20 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install
         run: pnpm install --frozen-lockfile
-        working-directory: .
-      - run: pnpm typecheck
-      - run: pnpm lint
-      - run: pnpm build
-
-  api:
-    name: API (.NET + FastEndpoints)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/api
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: "10.0.x"
-      - run: dotnet restore MedManager.sln
-      - run: dotnet build MedManager.sln --no-restore --configuration Release
-      - run: dotnet test MedManager.Api.Tests/MedManager.Api.Tests.csproj --no-build --configuration Release --verbosity normal
+      - name: Typecheck (all)
+        run: pnpm typecheck
+      - name: Lint (web)
+        run: pnpm --filter web lint
+      - name: API tests
+        run: pnpm --filter @medmanager/api test
+      - name: API build
+        run: pnpm --filter @medmanager/api build
+      - name: Web build
+        run: pnpm --filter web build
 
   docker:
     name: Build + push API image
-    needs: api
+    needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
@@ -67,7 +55,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v6
         with:
-          context: apps/api
+          context: .
+          file: apps/api/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/medmanager-api:latest

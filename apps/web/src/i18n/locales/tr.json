@@ -87,7 +87,7 @@
   },
   "disclaimer": {
     "title": "Tıbbi Sorumluluk Reddi",
-    "body": "medmanager bir ilaç envanter uygulamasıdır. Tıbbi tavsiye vermez, teşhis veya tedavi amaçlı kullanılamaz. Her ilaç kullanımı için doktorunuza danışın.",
+    "body": "MedManager bir ilaç envanter uygulamasıdır. Tıbbi tavsiye vermez, teşhis veya tedavi amaçlı kullanılamaz. Her ilaç kullanımı için doktorunuza danışın.",
     "accept": "Anladım, kabul ediyorum"
   },
   "legal": {
@@ -105,7 +105,7 @@
   },
   "about": {
     "title": "Hakkında",
-    "description": "medmanager, evindeki ilaçları takip etmeni sağlayan kişisel bir uygulamadır. Açık kaynaklıdır.",
+    "description": "MedManager, evindeki ilaçları takip etmeni sağlayan kişisel bir uygulamadır. Açık kaynaklıdır.",
     "source_code": "Kaynak kodu"
   },
   "profile": {

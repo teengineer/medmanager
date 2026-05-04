@@ -15,8 +15,8 @@ export default defineConfig({
       injectRegister: "auto",
       includeAssets: ["favicon.svg", "icons/*.png"],
       manifest: {
-        name: "medmanager",
-        short_name: "medmanager",
+        name: "MedManager",
+        short_name: "MedManager",
         description: "Household medicine inventory",
         lang: "tr",
         theme_color: "#E30A17",

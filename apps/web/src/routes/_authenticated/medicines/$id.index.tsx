@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useDeleteMedicine, useMedicine, useOpenMedicine } from "../../../features/medicines/hooks";
 import type { Medicine } from "../../../features/medicines/hooks";
 
-export const Route = createFileRoute("/_authenticated/medicines/$id")({
+export const Route = createFileRoute("/_authenticated/medicines/$id/")({
   component: MedicineDetailPage,
 });
 

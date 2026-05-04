@@ -22,7 +22,7 @@ function TermsPage() {
       {isTr ? (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            medmanager kişisel ilaç envanteri takibi amacıyla sunulan bir araçtır. Kullanmakla
+            MedManager kişisel ilaç envanteri takibi amacıyla sunulan bir araçtır. Kullanmakla
             aşağıdaki koşulları kabul etmiş olursunuz.
           </p>
           <h2 className="text-xl font-semibold">Tıbbi tavsiye değildir</h2>
@@ -40,7 +40,7 @@ function TermsPage() {
       ) : (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            medmanager is a personal medicine-inventory tool. By using it you accept the terms
+            MedManager is a personal medicine-inventory tool. By using it you accept the terms
             below.
           </p>
           <h2 className="text-xl font-semibold">Not medical advice</h2>

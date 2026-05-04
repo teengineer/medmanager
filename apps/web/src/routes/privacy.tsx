@@ -15,14 +15,14 @@ function PrivacyPage() {
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        medmanager
+        MedManager
       </Link>
       <h1 className="mt-4 text-3xl font-bold text-brand">{t("legal.privacy")}</h1>
 
       {isTr ? (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            medmanager ("biz") olarak gizliliğinize önem veriyoruz. Bu sayfa hangi verileri
+            MedManager ("biz") olarak gizliliğinize önem veriyoruz. Bu sayfa hangi verileri
             topladığımızı, nasıl kullandığımızı ve haklarınızı özetler.
           </p>
           <h2 className="text-xl font-semibold">Topladığımız veriler</h2>
@@ -48,7 +48,7 @@ function PrivacyPage() {
       ) : (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            medmanager ("we") respects your privacy. This page summarises what we collect, how we
+            MedManager ("we") respects your privacy. This page summarises what we collect, how we
             use it, and your rights.
           </p>
           <h2 className="text-xl font-semibold">What we collect</h2>

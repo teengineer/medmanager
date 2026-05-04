@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(netstat -ano)",
+      "Bash(git mv *)",
+      "Bash(pnpm api:generate)"
+    ]
+  }
+}

@@ -2,16 +2,21 @@ name: medmanager
 
 services:
   api:
-    image: ghcr.io/${GITHUB_OWNER:-youruser}/medmanager-api:${API_TAG:-latest}
+    image: ghcr.io/${GITHUB_OWNER:-teengineer}/medmanager-api:${API_TAG:-latest}
     restart: unless-stopped
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__Default: Data Source=/data/medmanager.db
-      Jwt__Issuer: ${JWT_ISSUER:-medmanager}
-      Jwt__Audience: ${JWT_AUDIENCE:-medmanager-web}
-      Jwt__SigningKey: ${JWT_SIGNING_KEY}
-      Cors__Origins__0: ${WEB_ORIGIN:-https://medmanager.example.com}
+      NODE_ENV: production
+      PORT: "8080"
+      DATABASE_URL: file:/data/medmanager.db
+      JWT_ISSUER: ${JWT_ISSUER:-medmanager}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-medmanager-web}
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
+      JWT_ACCESS_MINUTES: ${JWT_ACCESS_MINUTES:-15}
+      JWT_REFRESH_DAYS: ${JWT_REFRESH_DAYS:-7}
+      CORS_ORIGINS: ${WEB_ORIGIN:-https://medmanager.example.com}
+      PUSH_SUBJECT: ${PUSH_SUBJECT:-mailto:admin@medmanager.local}
+      PUSH_PUBLIC_KEY: ${PUSH_PUBLIC_KEY:-}
+      PUSH_PRIVATE_KEY: ${PUSH_PRIVATE_KEY:-}
     volumes:
       - sqlite-data:/data
     networks: [web]
