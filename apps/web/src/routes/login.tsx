@@ -1,12 +1,11 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { GoogleSignInButton } from "../features/auth/GoogleSignInButton";
-import { LoginForm } from "../features/auth/LoginForm";
-import { auth } from "../lib/api/client";
+import { GoogleSignInButton } from "~/features/auth/GoogleSignInButton";
+import { LoginForm } from "~/features/auth/LoginForm";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: () => {
-    if (auth.token) throw redirect({ to: "/" });
+  beforeLoad: ({ context }) => {
+    if (context.session) throw redirect({ to: "/" });
   },
   component: LoginPage,
 });

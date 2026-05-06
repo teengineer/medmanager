@@ -1,8 +1,9 @@
 import { createFileRoute, Link as RLink, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { auth, api } from "../../lib/api/client";
+import { api } from "~/lib/api/client";
+import { authClient } from "~/lib/auth-client";
 import { useQueryClient } from "@tanstack/react-query";
-import { BackButton } from "../../features/navigation/BackButton";
+import { BackButton } from "~/features/navigation/BackButton";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -14,11 +15,9 @@ function SettingsPage() {
   const qc = useQueryClient();
 
   const handleExport = async () => {
-    const base = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
-    const res = await fetch(`${base}/me/export`, {
+    const res = await fetch("/api/me/export", {
       method: "POST",
       credentials: "include",
-      headers: auth.token ? { Authorization: `Bearer ${auth.token}` } : undefined,
     });
     if (!res.ok) return;
     const blob = await res.blob();
@@ -35,7 +34,7 @@ function SettingsPage() {
     try {
       await api<void>("/me", { method: "DELETE" });
     } finally {
-      auth.token = null;
+      await authClient.signOut().catch(() => undefined);
       qc.clear();
       await navigate({ to: "/login" });
     }

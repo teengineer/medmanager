@@ -8,13 +8,6 @@ build/
 out/
 .vite/
 
-# .NET
-bin/
-obj/
-*.user
-*.suo
-.vs/
-
 # Environment
 .env
 .env.local

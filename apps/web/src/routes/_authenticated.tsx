@@ -1,13 +1,11 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { useMe } from "../features/auth/hooks";
-import { AppHeader } from "../features/navigation/AppHeader";
-import { refreshTokens } from "../lib/api/client";
+import { useMe } from "~/features/auth/hooks";
+import { AppHeader } from "~/features/navigation/AppHeader";
 
 export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: async () => {
-    const refreshed = await refreshTokens();
-    if (!refreshed) {
+  beforeLoad: ({ context }) => {
+    if (!context.session) {
       throw redirect({ to: "/login" });
     }
   },

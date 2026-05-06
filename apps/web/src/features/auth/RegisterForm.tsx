@@ -3,7 +3,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { ApiError } from "../../lib/api/client";
 import { useRegister } from "./hooks";
 
 const schema = z.object({
@@ -30,7 +29,8 @@ export function RegisterForm() {
       await register.mutateAsync({ ...values, locale });
       await navigate({ to: "/" });
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
+      const message = err instanceof Error ? err.message.toLowerCase() : "";
+      if (message.includes("exist") || message.includes("taken") || message.includes("already")) {
         form.setError("email", { message: t("auth.email_taken") });
       } else {
         form.setError("root", { message: t("auth.generic_error") });

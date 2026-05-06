@@ -1,13 +1,14 @@
 [build]
   command = "pnpm install --frozen-lockfile && pnpm --filter web build"
-  publish = "apps/web/dist"
+  publish = "apps/web/dist/client"
 
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
 
-# SPA fallback: all unknown routes → index.html
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# TanStack Start serves SSR via a Netlify Function (auto-detected).
+# /api/* routes are handled inside the SSR function — no extra redirect needed.
+
+# Daily expiry notifier cron (09:00 UTC = 12:00 İstanbul)
+[functions."api/cron/expiry"]
+  schedule = "0 9 * * *"

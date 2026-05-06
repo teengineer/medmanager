@@ -3,7 +3,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
-import { ApiError } from "../../lib/api/client";
 import { useLogin } from "./hooks";
 
 const schema = z.object({
@@ -27,7 +26,8 @@ export function LoginForm() {
       await login.mutateAsync(values);
       await navigate({ to: "/" });
     } catch (err) {
-      if (err instanceof ApiError && err.status === 401) {
+      const message = err instanceof Error ? err.message.toLowerCase() : "";
+      if (message.includes("invalid") || message.includes("credential") || message.includes("password")) {
         form.setError("password", { message: t("auth.invalid_credentials") });
       } else {
         form.setError("root", { message: t("auth.generic_error") });

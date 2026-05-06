@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { api, auth, refreshTokens, type AuthResponse, type MeDto } from "../../lib/api/client";
+import { authClient } from "~/lib/auth-client";
+import { api, type MeDto } from "~/lib/api/client";
 
 const ME_KEY = ["me"] as const;
 
@@ -8,10 +9,6 @@ export function useMe() {
   return useQuery<MeDto | null>({
     queryKey: ME_KEY,
     queryFn: async () => {
-      if (!auth.token) {
-        const refreshed = await refreshTokens();
-        if (!refreshed) return null;
-      }
       try {
         return await api<MeDto>("/me");
       } catch {
@@ -33,17 +30,20 @@ export function useLogin() {
   const { i18n } = useTranslation();
   return useMutation({
     mutationFn: async (input: LoginInput) => {
-      const res = await api<AuthResponse>("/auth/login", {
-        method: "POST",
-        body: JSON.stringify(input),
+      const res = await authClient.signIn.email({
+        email: input.email,
+        password: input.password,
       });
-      auth.token = res.accessToken;
-      return res;
+      if (res.error) throw new Error(res.error.message ?? "Login failed");
+      return res.data;
     },
-    onSuccess: async (res) => {
-      qc.setQueryData(ME_KEY, res.user);
-      if (res.user.locale !== i18n.language) {
-        await i18n.changeLanguage(res.user.locale);
+    onSuccess: async () => {
+      const me = await api<MeDto>("/me").catch(() => null);
+      if (me) {
+        qc.setQueryData(ME_KEY, me);
+        if (me.locale && me.locale !== i18n.language) {
+          await i18n.changeLanguage(me.locale);
+        }
       }
     },
   });
@@ -61,15 +61,21 @@ export function useRegister() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: RegisterInput) => {
-      const res = await api<AuthResponse>("/auth/register", {
-        method: "POST",
-        body: JSON.stringify(input),
+      const name = [input.firstName, input.lastName].filter(Boolean).join(" ").trim() || input.email;
+      const res = await authClient.signUp.email({
+        email: input.email,
+        password: input.password,
+        name,
+        firstName: input.firstName ?? null,
+        lastName: input.lastName ?? null,
+        locale: input.locale,
       });
-      auth.token = res.accessToken;
-      return res;
+      if (res.error) throw new Error(res.error.message ?? "Sign up failed");
+      return res.data;
     },
-    onSuccess: (res) => {
-      qc.setQueryData(ME_KEY, res.user);
+    onSuccess: async () => {
+      const me = await api<MeDto>("/me").catch(() => null);
+      if (me) qc.setQueryData(ME_KEY, me);
     },
   });
 }
@@ -78,11 +84,7 @@ export function useLogout() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      try {
-        await api<void>("/auth/logout", { method: "POST" });
-      } finally {
-        auth.token = null;
-      }
+      await authClient.signOut();
     },
     onSuccess: () => {
       qc.setQueryData(ME_KEY, null);
@@ -124,7 +126,13 @@ export function useUpdateProfile() {
 
 export function useChangePassword() {
   return useMutation({
-    mutationFn: (input: { currentPassword?: string; newPassword: string }) =>
-      api<void>("/me/password", { method: "POST", body: JSON.stringify(input) }),
+    mutationFn: async (input: { currentPassword?: string; newPassword: string }) => {
+      const res = await authClient.changePassword({
+        currentPassword: input.currentPassword ?? "",
+        newPassword: input.newPassword,
+      });
+      if (res.error) throw new Error(res.error.message ?? "Password change failed");
+      return res.data;
+    },
   });
 }

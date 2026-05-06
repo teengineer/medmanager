@@ -6,16 +6,27 @@
   "engines": {
     "node": ">=22"
   },
+  "pnpm": {
+    "overrides": {
+      "@tanstack/router-core": "1.166.7",
+      "@tanstack/react-router": "1.166.7",
+      "@tanstack/react-start": "1.166.7",
+      "@tanstack/start-server-core": "1.166.7",
+      "@tanstack/start-client-core": "1.166.7",
+      "@tanstack/start-plugin-core": "1.166.7",
+      "@tanstack/start-storage-context": "1.166.7"
+    }
+  },
   "scripts": {
     "dev": "pnpm --filter web dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck",
-    "test": "pnpm --filter @medmanager/api test",
-    "api:dev": "pnpm --filter @medmanager/api dev",
-    "api:test": "pnpm --filter @medmanager/api test",
-    "api:build": "pnpm --filter @medmanager/api build",
-    "api:migrate": "pnpm --filter @medmanager/api db:migrate",
-    "api:generate": "pnpm --filter @medmanager/api db:generate"
+    "build": "pnpm --filter web build",
+    "start": "pnpm --filter web start",
+    "lint": "pnpm --filter web lint",
+    "typecheck": "pnpm --filter web typecheck",
+    "test": "pnpm --filter web test",
+    "db:migrate": "pnpm --filter web db:migrate",
+    "db:generate": "pnpm --filter web db:generate",
+    "db:seed": "pnpm --filter web db:seed",
+    "db:studio": "pnpm --filter web db:studio"
   }
 }

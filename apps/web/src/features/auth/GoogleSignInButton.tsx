@@ -1,49 +1,20 @@
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { api, auth, type AuthResponse } from "../../lib/api/client";
-import { useQueryClient } from "@tanstack/react-query";
-
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+import { authClient } from "~/lib/auth-client";
 
 export function GoogleSignInButton() {
-  if (!CLIENT_ID) return null;
-  return (
-    <GoogleOAuthProvider clientId={CLIENT_ID}>
-      <InnerButton />
-    </GoogleOAuthProvider>
-  );
-}
+  const { t } = useTranslation();
 
-function InnerButton() {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const qc = useQueryClient();
-
-  const login = useGoogleLogin({
-    onSuccess: async (response) => {
-      try {
-        const body = await api<AuthResponse>("/auth/google", {
-          method: "POST",
-          body: JSON.stringify({ accessToken: response.access_token }),
-        });
-        auth.token = body.accessToken;
-        qc.setQueryData(["me"], body.user);
-        if (body.user.locale !== i18n.language) {
-          await i18n.changeLanguage(body.user.locale);
-        }
-        await navigate({ to: "/" });
-      } catch {
-        // ignore; upstream forms show errors
-      }
-    },
-    flow: "implicit",
-  });
+  const handleClick = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/",
+    });
+  };
 
   return (
     <button
       type="button"
-      onClick={() => login()}
+      onClick={handleClick}
       className="flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
     >
       <svg viewBox="0 0 24 24" className="size-4" aria-hidden>
