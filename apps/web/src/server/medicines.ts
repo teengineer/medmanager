@@ -72,7 +72,12 @@ export async function loadWithTags(userId: string, medicineId?: string) {
 
 export function jsonError(zodError: z.ZodError, status = 400) {
   return Response.json(
-    { errors: zodError.errors.map((e) => ({ field: e.path.join("."), message: e.message })) },
+    {
+      errors: zodError.issues.map((e) => ({
+        field: e.path.join("."),
+        message: e.message,
+      })),
+    },
     { status },
   );
 }
