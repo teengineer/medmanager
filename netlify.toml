@@ -5,6 +5,10 @@
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
+  # These env vars are public values (site URLs, OAuth client ID, contact email) that
+  # naturally appear in source/docs. The scanner still flags real secrets — secret tokens,
+  # auth secrets, private keys — which we never commit.
+  SECRETS_SCAN_OMIT_KEYS = "BETTER_AUTH_URL,WEB_ORIGIN,GOOGLE_CLIENT_ID,PUSH_SUBJECT,DATABASE_URL"
 
 [functions]
   directory = "apps/web/netlify/functions"
