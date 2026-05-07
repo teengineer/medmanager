@@ -6,9 +6,16 @@
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
 
-# TanStack Start serves SSR via a Netlify Function (auto-detected).
-# /api/* routes are handled inside the SSR function — no extra redirect needed.
+[functions]
+  directory = "apps/web/netlify/functions"
+  node_bundler = "esbuild"
+
+# All non-static routes go through the SSR function (which includes /api/*)
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/server"
+  status = 200
 
 # Daily expiry notifier cron (09:00 UTC = 12:00 İstanbul)
-[functions."api/cron/expiry"]
+[functions."expiry-cron"]
   schedule = "0 9 * * *"

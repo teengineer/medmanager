@@ -17,6 +17,18 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
+  resolve: {
+    alias: {
+      "node:stream": "node:stream",
+      "node:stream/web": "node:stream/web",
+      "node:async_hooks": "node:async_hooks",
+    },
+  },
+  build: {
+    rollupOptions: {
+      external: ["node:stream", "node:stream/web", "node:async_hooks"],
+    },
+  },
   optimizeDeps: {
     include: [
       "react",
