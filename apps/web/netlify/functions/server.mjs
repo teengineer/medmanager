@@ -8,4 +8,13 @@ export default async (request, _context) => {
 
 export const config = {
   path: "/*",
+  excludedPath: [
+    "/assets/*",
+    "/icons/*",
+    "/favicon.png",
+    "/favicon.ico",
+    "/manifest.webmanifest",
+    "/robots.txt",
+    "/sitemap.xml",
+  ],
 };

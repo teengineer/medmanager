@@ -5,41 +5,16 @@
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
-  # These env vars are public values (site URLs, OAuth client ID, contact email) that
-  # naturally appear in source/docs. The scanner still flags real secrets — secret tokens,
-  # auth secrets, private keys — which we never commit.
+  # Public values that naturally appear in source/docs (site URLs, OAuth client ID,
+  # contact email, DB URL). Real secrets (auth tokens, signing keys) are still scanned.
   SECRETS_SCAN_OMIT_KEYS = "BETTER_AUTH_URL,WEB_ORIGIN,GOOGLE_CLIENT_ID,PUSH_SUBJECT,DATABASE_URL"
 
 [functions]
   directory = "apps/web/netlify/functions"
   node_bundler = "esbuild"
 
-# Static asset passthrough — keep these out of the SSR function.
-[[redirects]]
-  from = "/assets/*"
-  to = "/assets/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/icons/*"
-  to = "/icons/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/favicon.png"
-  to = "/favicon.png"
-  status = 200
-
-[[redirects]]
-  from = "/manifest.webmanifest"
-  to = "/manifest.webmanifest"
-  status = 200
-
-# All other routes go through the SSR function (includes /api/*)
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
+# Path matching is declared in the function file itself via config.path / excludedPath
+# (Netlify Functions v2). Static files in publish dir are served as-is.
 
 # Daily expiry notifier cron (09:00 UTC = 12:00 İstanbul)
 [functions."expiry-cron"]
