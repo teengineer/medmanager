@@ -19,13 +19,16 @@ function AuthenticatedLayout() {
   if (me.isLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center">
-        <p className="text-slate-500">{t("common.loading")}</p>
+        <span className="flex items-center gap-3 text-slate-500">
+          <span className="size-5 animate-spin rounded-full border-2 border-brand-light border-t-brand" />
+          {t("common.loading")}
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-slate-50">
+    <div className="min-h-dvh">
       <AppHeader />
       <Outlet />
     </div>

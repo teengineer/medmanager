@@ -2,6 +2,10 @@
   "hello": "Hello",
   "tagline": "Track your medicines, avoid waste.",
   "toggle_language": "Türkçe",
+  "home": {
+    "my_medicines_subtitle": "View and manage your stock",
+    "check_subtitle": "So you can say \"I already have this\""
+  },
   "common": {
     "loading": "Loading…",
     "saving": "Saving…",
@@ -35,6 +39,8 @@
   },
   "medicine": {
     "my_medicines": "My medicines",
+    "count": "{{count}} medicine",
+    "count_plural": "{{count}} medicines",
     "add": "Add medicine",
     "add_first": "Add your first medicine",
     "edit": "Edit medicine",
@@ -72,7 +78,8 @@
       "valid": "Valid",
       "expiring": "Expiring",
       "expired": "Expired",
-      "opened": "Opened"
+      "opened": "Opened",
+      "unopened": "Unopened"
     }
   },
   "check": {

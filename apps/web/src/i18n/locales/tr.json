@@ -2,6 +2,10 @@
   "hello": "Merhaba",
   "tagline": "İlaçlarınızı takip edin, israfı önleyin.",
   "toggle_language": "English",
+  "home": {
+    "my_medicines_subtitle": "Tüm ilaçlarını görüntüle ve yönet",
+    "check_subtitle": "Doktorda \"bu var\" diyebilmek için"
+  },
   "common": {
     "loading": "Yükleniyor…",
     "saving": "Kaydediliyor…",
@@ -35,6 +39,7 @@
   },
   "medicine": {
     "my_medicines": "İlaçlarım",
+    "count": "{{count}} ilaç",
     "add": "İlaç Ekle",
     "add_first": "İlk ilacını ekle",
     "edit": "İlacı düzenle",
@@ -72,7 +77,8 @@
       "valid": "Geçerli",
       "expiring": "Yaklaşan",
       "expired": "Süresi doldu",
-      "opened": "Açılmış"
+      "opened": "Açılmış",
+      "unopened": "Açılmamış"
     }
   },
   "check": {

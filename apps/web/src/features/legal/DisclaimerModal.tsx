@@ -16,19 +16,31 @@ export function DisclaimerModal() {
   if (!shown) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center">
-      <div className="w-full max-w-md rounded-t-2xl bg-white p-6 sm:rounded-2xl">
-        <h2 className="text-xl font-bold text-brand">{t("disclaimer.title")}</h2>
-        <p className="mt-3 text-sm text-slate-700">{t("disclaimer.body")}</p>
-        <button
-          onClick={() => {
-            window.localStorage.setItem(KEY, new Date().toISOString());
-            setShown(false);
-          }}
-          className="mt-5 w-full rounded-md bg-brand px-4 py-2 text-white hover:bg-brand-dark"
-        >
-          {t("disclaimer.accept")}
-        </button>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 backdrop-blur-sm sm:items-center animate-fade-in">
+      <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/30 bg-white shadow-pop animate-rise sm:rounded-3xl">
+        <div className="bg-gradient-to-br from-brand-50 to-white p-6 pb-4">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-2xl bg-brand text-white shadow-brand">
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 9v4M12 17h.01" strokeLinecap="round" />
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+            </span>
+            <h2 className="text-xl font-bold text-slate-900">{t("disclaimer.title")}</h2>
+          </div>
+          <p className="mt-4 text-sm leading-relaxed text-slate-700">{t("disclaimer.body")}</p>
+        </div>
+        <div className="border-t border-slate-100 bg-white p-4">
+          <button
+            onClick={() => {
+              window.localStorage.setItem(KEY, new Date().toISOString());
+              setShown(false);
+            }}
+            className="btn-primary w-full"
+          >
+            {t("disclaimer.accept")}
+          </button>
+        </div>
       </div>
     </div>
   );

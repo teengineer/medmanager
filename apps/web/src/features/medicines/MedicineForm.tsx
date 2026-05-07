@@ -130,7 +130,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
               placeholder={t("medicine.use_case_search_placeholder")}
               className={inputCls}
             />
-            <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto rounded-md border border-slate-200 p-2">
+            <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-2">
               {(() => {
                 const normalized = query.trim().toLocaleLowerCase();
                 const filtered = (useCases.data ?? []).filter((uc) =>
@@ -156,10 +156,10 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
                           { shouldDirty: true },
                         );
                       }}
-                      className={`rounded-full px-3 py-1 text-sm transition ${
+                      className={`rounded-full px-3 py-1 text-sm font-medium transition ${
                         selected
-                          ? "bg-brand text-white"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          ? "bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
+                          : "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
                       }`}
                     >
                       {uc.name}
@@ -182,7 +182,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
                         );
                         setQuery("");
                       }}
-                      className="rounded-full border border-dashed border-brand px-3 py-1 text-sm text-brand hover:bg-brand-light disabled:opacity-60"
+                      className="rounded-full border-2 border-dashed border-brand px-3 py-1 text-sm font-medium text-brand transition hover:bg-brand-50 disabled:opacity-60"
                     >
                       + {t("medicine.add_use_case", { name: query.trim() })}
                     </button>,
@@ -207,18 +207,14 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         <textarea rows={2} className={inputCls} {...form.register("notes")} />
       </Field>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md bg-brand px-4 py-2 text-white hover:bg-brand-dark disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className="btn-primary mt-2 w-full">
         {pending ? t("common.saving") : submitLabel}
       </button>
     </form>
   );
 }
 
-const inputCls = "rounded-md border border-slate-300 px-3 py-2 w-full";
+const inputCls = "input-base";
 
 function Field({
   label,
@@ -230,10 +226,10 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-sm font-medium">{label}</span>
+    <label className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium text-slate-700">{label}</span>
       {children}
-      {error && <span className="text-sm text-red-600">{error}</span>}
+      {error && <span className="text-xs text-red-600">{error}</span>}
     </label>
   );
 }

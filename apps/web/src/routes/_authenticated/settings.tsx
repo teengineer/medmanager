@@ -41,38 +41,107 @@ function SettingsPage() {
   };
 
   return (
-    <main className="mx-auto max-w-xl p-6 pb-24">
-      <div className="flex items-center gap-3">
+    <main className="mx-auto max-w-xl p-4 pb-24 sm:p-6">
+      <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold text-brand">{t("profile.data_and_privacy")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          {t("profile.data_and_privacy")}
+        </h1>
       </div>
 
-      <section className="mt-8 flex flex-col gap-3">
-        <button
+      <section className="surface-card flex flex-col divide-y divide-slate-100 p-2">
+        <SettingRow
           onClick={handleExport}
-          className="rounded-md border border-slate-300 px-4 py-3 text-left text-slate-800 hover:bg-slate-50"
-        >
-          <span className="font-medium">{t("legal.export")}</span>
-        </button>
-        <RLink
-          to="/privacy"
-          className="rounded-md border border-slate-300 px-4 py-3 text-slate-800 hover:bg-slate-50"
-        >
-          {t("legal.privacy")}
-        </RLink>
-        <RLink
-          to="/terms"
-          className="rounded-md border border-slate-300 px-4 py-3 text-slate-800 hover:bg-slate-50"
-        >
-          {t("legal.terms")}
-        </RLink>
-        <button
-          onClick={handleDeleteAccount}
-          className="mt-6 rounded-md border border-red-300 bg-red-50 px-4 py-3 text-left text-red-700 hover:bg-red-100"
-        >
-          <span className="font-medium">{t("legal.delete_account")}</span>
-        </button>
+          icon={<DownloadIcon />}
+          title={t("legal.export")}
+        />
+        <SettingLink to="/privacy" icon={<LockIcon />} title={t("legal.privacy")} />
+        <SettingLink to="/terms" icon={<DocIcon />} title={t("legal.terms")} />
       </section>
+
+      <button
+        onClick={handleDeleteAccount}
+        className="mt-6 flex w-full items-center gap-3 rounded-2xl border border-red-200 bg-red-50/50 p-4 text-left text-red-700 transition hover:bg-red-50"
+      >
+        <span className="flex size-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
+          <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14" strokeLinecap="round" />
+          </svg>
+        </span>
+        <span className="flex-1 font-medium">{t("legal.delete_account")}</span>
+      </button>
     </main>
+  );
+}
+
+function SettingRow({
+  onClick,
+  icon,
+  title,
+}: {
+  onClick: () => void;
+  icon: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-slate-50"
+    >
+      <span className="flex size-10 items-center justify-center rounded-xl bg-brand-light text-brand">
+        {icon}
+      </span>
+      <span className="flex-1 font-medium text-slate-800">{title}</span>
+      <ChevronIcon />
+    </button>
+  );
+}
+
+function SettingLink({ to, icon, title }: { to: string; icon: React.ReactNode; title: string }) {
+  return (
+    <RLink
+      to={to}
+      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-slate-50"
+    >
+      <span className="flex size-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+        {icon}
+      </span>
+      <span className="flex-1 font-medium text-slate-800">{title}</span>
+      <ChevronIcon />
+    </RLink>
+  );
+}
+
+function ChevronIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 4v12M7 11l5 5 5-5M5 20h14" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <rect x="4" y="11" width="16" height="10" rx="2" />
+      <path d="M8 11V7a4 4 0 018 0v4" />
+    </svg>
+  );
+}
+
+function DocIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9z" />
+      <path d="M14 3v6h6M9 13h6M9 17h6" strokeLinecap="round" />
+    </svg>
   );
 }
