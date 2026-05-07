@@ -105,11 +105,12 @@ function ProfileMenu({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="absolute inset-x-0 top-14 flex justify-end px-4">
-      <div
-        ref={ref}
-        className="w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg"
-      >
+    <div className="absolute inset-x-0 top-14">
+      <div className="mx-auto flex max-w-5xl justify-end px-4">
+        <div
+          ref={ref}
+          className="w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg"
+        >
         {me.data && (
           <div className="border-b border-slate-100 p-3 text-sm">
             <p className="font-medium text-slate-900">{displayName(me.data)}</p>
@@ -153,6 +154,7 @@ function ProfileMenu({ onClose }: { onClose: () => void }) {
         >
           {t("auth.sign_out")}
         </button>
+        </div>
       </div>
     </div>
   );

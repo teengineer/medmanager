@@ -89,6 +89,9 @@ export function useLogout() {
     onSuccess: () => {
       qc.setQueryData(ME_KEY, null);
       qc.clear();
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     },
   });
 }
