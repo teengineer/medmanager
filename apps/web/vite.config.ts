@@ -1,3 +1,6 @@
+import { config as loadEnv } from "dotenv";
+loadEnv({ path: ".env.local" });
+loadEnv({ path: ".env" });
 import { defineConfig } from "vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
@@ -17,16 +20,16 @@ export default defineConfig({
     viteReact(),
     tailwindcss(),
   ],
-  resolve: {
-    alias: {
-      "node:stream": "node:stream",
-      "node:stream/web": "node:stream/web",
-      "node:async_hooks": "node:async_hooks",
-    },
+  ssr: {
+    external: ["node:stream", "node:stream/web", "node:async_hooks"],
   },
-  build: {
-    rollupOptions: {
-      external: ["node:stream", "node:stream/web", "node:async_hooks"],
+  environments: {
+    client: {
+      build: {
+        rollupOptions: {
+          external: ["node:stream", "node:stream/web", "node:async_hooks"],
+        },
+      },
     },
   },
   optimizeDeps: {
@@ -38,8 +41,6 @@ export default defineConfig({
       "react/jsx-dev-runtime",
       "@tanstack/react-router",
       "@tanstack/react-query",
-      "@tanstack/router-core",
-      "@tanstack/router-core/ssr/client",
     ],
   },
 });

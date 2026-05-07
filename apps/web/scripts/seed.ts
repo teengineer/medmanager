@@ -1,12 +1,10 @@
-import { seedUseCases } from "../src/db/seed";
+import { config as loadEnv } from "dotenv";
 
-async function main() {
-  await seedUseCases();
-  console.log("[medmanager] seed complete");
-  process.exit(0);
-}
+loadEnv({ path: ".env.local" });
+loadEnv({ path: ".env" });
 
-main().catch((err) => {
-  console.error("[medmanager] seed failed:", err);
-  process.exit(1);
-});
+const { seedUseCases } = await import("../src/db/seed");
+
+await seedUseCases();
+console.log("[medmanager] seed complete");
+process.exit(0);

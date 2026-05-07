@@ -1,16 +1,14 @@
-import { migrate } from "drizzle-orm/libsql/migrator";
-import { db } from "../src/db/index";
-import { seedUseCases } from "../src/db/seed";
+import { config as loadEnv } from "dotenv";
 
-async function main() {
-  await migrate(db, { migrationsFolder: "./drizzle" });
-  console.log("[medmanager] migrations applied");
-  await seedUseCases();
-  console.log("[medmanager] seed complete");
-  process.exit(0);
-}
+loadEnv({ path: ".env.local" });
+loadEnv({ path: ".env" });
 
-main().catch((err) => {
-  console.error("[medmanager] migrate failed:", err);
-  process.exit(1);
-});
+const { migrate } = await import("drizzle-orm/libsql/migrator");
+const { db } = await import("../src/db/index");
+const { seedUseCases } = await import("../src/db/seed");
+
+await migrate(db, { migrationsFolder: "./drizzle" });
+console.log("[medmanager] migrations applied");
+await seedUseCases();
+console.log("[medmanager] seed complete");
+process.exit(0);
