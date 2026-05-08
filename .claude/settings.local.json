@@ -11,7 +11,14 @@
       "Bash(git commit -m ' *)",
       "Bash(pnpm install *)",
       "Bash(pnpm exec *)",
-      "Bash(grep -n \"ApiAuthSplat\\\\|api/auth/\\\\$\" \"D:/Repositories/medmanager/apps/web/src/routeTree.gen.ts\")"
+      "Bash(grep -n \"ApiAuthSplat\\\\|api/auth/\\\\$\" \"D:/Repositories/medmanager/apps/web/src/routeTree.gen.ts\")",
+      "Bash(pnpm typecheck *)",
+      "Bash(pnpm --filter web build)",
+      "Bash(git commit *)",
+      "Bash(pnpm list *)",
+      "PowerShell(pnpm list *)",
+      "PowerShell(node -e \"try{require.resolve\\('sharp'\\);console.log\\('found'\\)}catch\\(e\\){console.log\\('missing'\\)}\")",
+      "PowerShell($src = \"C:\\\\Users\\\\Firdevs\\\\Downloads\\\\Gemini_Generated_Image_hg49vvhg49vvhg49__1_-removebg-preview.png\"; Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\($src\\); \"Width: $\\($img.Width\\), Height: $\\($img.Height\\)\"; $img.Dispose\\(\\))"
     ]
   }
 }

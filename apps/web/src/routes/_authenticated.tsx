@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useMe } from "~/features/auth/hooks";
 import { AppHeader } from "~/features/navigation/AppHeader";
@@ -13,8 +14,15 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedLayout() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const me = useMe();
+
+  useEffect(() => {
+    const userLocale = me.data?.locale;
+    if (userLocale && (userLocale === "tr" || userLocale === "en") && i18n.language !== userLocale) {
+      void i18n.changeLanguage(userLocale);
+    }
+  }, [me.data?.locale, i18n]);
 
   if (me.isLoading) {
     return (

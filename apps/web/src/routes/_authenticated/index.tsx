@@ -47,6 +47,7 @@ function HomePage() {
         <StatCard
           label={t("profile.stats.total")}
           value={items.length}
+          to="/medicines"
           icon={
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-5">
               <path d="M4 7h16M4 12h16M4 17h10" strokeLinecap="round" />
@@ -57,6 +58,8 @@ function HomePage() {
           label={t("profile.stats.valid")}
           value={valid}
           tone="brand"
+          to="/medicines"
+          search={{ filter: "valid" }}
           icon={
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-5">
               <path d="M5 12l4 4 10-10" strokeLinecap="round" strokeLinejoin="round" />
@@ -67,6 +70,8 @@ function HomePage() {
           label={t("profile.stats.critical")}
           value={expired + expiring}
           tone="amber"
+          to="/medicines"
+          search={{ filter: "critical" }}
           icon={
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-5">
               <path d="M12 9v4M12 17h.01M10.3 3.86l-8.06 14a2 2 0 001.74 3h16.04a2 2 0 001.74-3l-8.06-14a2 2 0 00-3.4 0z" strokeLinecap="round" strokeLinejoin="round" />
@@ -86,7 +91,6 @@ function HomePage() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-7">
               <rect x="3" y="7" width="18" height="13" rx="3" />
               <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" strokeLinecap="round" />
-              <path d="M12 11v5M9.5 13.5h5" strokeLinecap="round" />
             </svg>
           }
         />
@@ -134,11 +138,15 @@ function StatCard({
   value,
   tone,
   icon,
+  to,
+  search,
 }: {
   label: string;
   value: number;
   tone?: "brand" | "amber";
   icon?: React.ReactNode;
+  to?: "/medicines";
+  search?: { filter?: "valid" | "critical" };
 }) {
   const valueCls =
     tone === "brand"
@@ -152,8 +160,9 @@ function StatCard({
       : tone === "amber"
         ? "bg-amber-100 text-amber-700"
         : "bg-slate-100 text-slate-600";
-  return (
-    <div className="surface-card flex flex-col items-center gap-1.5 p-4 transition hover:-translate-y-0.5 hover:shadow-pop">
+
+  const content = (
+    <>
       {icon && (
         <span className={`flex size-9 items-center justify-center rounded-full ${iconCls}`}>
           {icon}
@@ -161,8 +170,20 @@ function StatCard({
       )}
       <p className={`text-2xl font-bold ${valueCls}`}>{value}</p>
       <p className="text-center text-[11px] font-medium uppercase tracking-wide text-mute">{label}</p>
-    </div>
+    </>
   );
+
+  const className =
+    "surface-card flex flex-col items-center gap-1.5 p-4 transition hover:-translate-y-0.5 hover:shadow-pop hover:border-slate-300 active:scale-[0.98]";
+
+  if (to) {
+    return (
+      <Link to={to} search={search ?? {}} className={className}>
+        {content}
+      </Link>
+    );
+  }
+  return <div className={className}>{content}</div>;
 }
 
 function ActionCard({

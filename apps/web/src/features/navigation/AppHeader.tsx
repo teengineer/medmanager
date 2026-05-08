@@ -213,13 +213,7 @@ function MenuItem({
 }
 
 function LogoMark() {
-  return (
-    <span className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-brand to-brand-dark shadow-brand">
-      <svg viewBox="0 0 24 24" className="size-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-      </svg>
-    </span>
-  );
+  return <img src="/favicon.png" alt="" className="size-8" />;
 }
 
 function MedicinesIcon() {

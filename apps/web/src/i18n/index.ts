@@ -18,7 +18,7 @@ if (!i18n.isInitialized) {
     supportedLngs: ["tr", "en"],
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator"],
+      order: ["localStorage"],
       caches: ["localStorage"],
       lookupLocalStorage: "medmanager.lang",
     },

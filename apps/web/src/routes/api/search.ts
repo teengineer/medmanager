@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, isNotNull, like, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines, useCases } from "~/db/schema";
@@ -8,9 +8,14 @@ import { resolveLocale } from "~/lib/locale";
 import { toMedicineDto } from "~/lib/medicines";
 import { jsonError } from "~/server/medicines";
 
-const querySchema = z.object({
-  useCase: z.string().min(1),
-});
+const querySchema = z
+  .object({
+    useCase: z.string().min(1).optional(),
+    activeIngredient: z.string().min(1).optional(),
+  })
+  .refine((v) => Boolean(v.useCase) !== Boolean(v.activeIngredient), {
+    message: "Provide exactly one of useCase or activeIngredient",
+  });
 
 export const Route = createFileRoute("/api/search")({
   server: {
@@ -25,19 +30,34 @@ export const Route = createFileRoute("/api/search")({
 
         const userId = session.user.id;
         const locale = await resolveLocale(userId, request.headers.get("accept-language"));
-        const { useCase } = parsed.data;
+        const { useCase, activeIngredient } = parsed.data;
 
-        const rows = await db
-          .select({ medicine: medicines })
-          .from(medicines)
-          .innerJoin(medicineUseCases, eq(medicineUseCases.medicineId, medicines.id))
-          .where(
-            and(
-              eq(medicines.userId, userId),
-              eq(medicineUseCases.useCaseId, useCase),
-              gt(medicines.quantity, "0"),
-            ),
-          );
+        const rows = activeIngredient
+          ? await db
+              .select({ medicine: medicines })
+              .from(medicines)
+              .where(
+                and(
+                  eq(medicines.userId, userId),
+                  gt(medicines.quantity, "0"),
+                  isNotNull(medicines.activeIngredient),
+                  like(
+                    sql`lower(${medicines.activeIngredient})`,
+                    `%${activeIngredient.toLowerCase()}%`,
+                  ),
+                ),
+              )
+          : await db
+              .select({ medicine: medicines })
+              .from(medicines)
+              .innerJoin(medicineUseCases, eq(medicineUseCases.medicineId, medicines.id))
+              .where(
+                and(
+                  eq(medicines.userId, userId),
+                  eq(medicineUseCases.useCaseId, useCase!),
+                  gt(medicines.quantity, "0"),
+                ),
+              );
 
         if (rows.length === 0) return Response.json({ items: [] });
 

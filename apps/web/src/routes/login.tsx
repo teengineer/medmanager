@@ -21,11 +21,7 @@ function LoginPage() {
       <div className="flex min-h-dvh items-center justify-center p-6">
         <div className="w-full max-w-sm animate-rise">
           <div className="mb-6 flex flex-col items-center text-center">
-            <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-brand to-brand-dark shadow-brand">
-              <svg viewBox="0 0 24 24" className="size-7 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-              </svg>
-            </span>
+            <img src="/favicon.png" alt="" className="size-14" />
             <h1 className="mt-4 bg-gradient-to-r from-brand to-brand-dark bg-clip-text text-2xl font-bold text-transparent">
               MedManager
             </h1>

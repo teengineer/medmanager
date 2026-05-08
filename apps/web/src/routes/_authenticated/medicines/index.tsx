@@ -4,16 +4,37 @@ import { useTranslation } from "react-i18next";
 import { MedicineCard } from "../../../features/medicines/MedicineCard";
 import { useMedicines } from "../../../features/medicines/hooks";
 
+const FILTERS = [
+  "all",
+  "critical",
+  "valid",
+  "expiring",
+  "expired",
+  "opened",
+  "unopened",
+] as const;
+type Filter = (typeof FILTERS)[number];
+
+function isFilter(value: unknown): value is Filter {
+  return typeof value === "string" && (FILTERS as readonly string[]).includes(value);
+}
+
 export const Route = createFileRoute("/_authenticated/medicines/")({
+  validateSearch: (search: Record<string, unknown>): { filter?: Filter } => {
+    return isFilter(search.filter) ? { filter: search.filter } : {};
+  },
   component: MedicinesPage,
 });
 
-type Filter = "all" | "valid" | "expiring" | "expired" | "opened" | "unopened";
-
 function MedicinesPage() {
   const { t } = useTranslation();
-  const [filter, setFilter] = useState<Filter>("all");
+  const { filter = "all" } = Route.useSearch();
+  const navigate = Route.useNavigate();
   const [q, setQ] = useState("");
+
+  const setFilter = (f: Filter) => {
+    void navigate({ search: f === "all" ? {} : { filter: f }, replace: true });
+  };
 
   const params: Parameters<typeof useMedicines>[0] = { q: q || undefined };
   if (filter === "valid") params.expired = false;
@@ -25,6 +46,7 @@ function MedicinesPage() {
 
   const items = (medicines.data?.items ?? []).filter((m) => {
     if (filter === "expiring") return !m.isExpired && m.daysUntilExpiry <= 30;
+    if (filter === "critical") return m.isExpired || m.daysUntilExpiry <= 30;
     return true;
   });
 
@@ -41,14 +63,8 @@ function MedicinesPage() {
             </p>
           )}
         </div>
-        <Link
-          to="/medicines/new"
-          className="btn-primary text-sm"
-        >
-          <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-          </svg>
-          <span className="hidden sm:inline">{t("medicine.add")}</span>
+        <Link to="/medicines/new" className="btn-primary text-sm">
+          {t("medicine.add")}
         </Link>
       </header>
 
@@ -84,7 +100,7 @@ function MedicinesPage() {
       </div>
 
       <div className="mb-5 -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-        {(["all", "valid", "expiring", "expired", "opened", "unopened"] as Filter[]).map((f) => (
+        {FILTERS.map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -111,14 +127,10 @@ function MedicinesPage() {
             <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.6">
               <rect x="3" y="7" width="18" height="13" rx="3" />
               <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" strokeLinecap="round" />
-              <path d="M12 11v5M9.5 13.5h5" strokeLinecap="round" />
             </svg>
           </span>
           <p className="mt-3 font-medium text-slate-700">{t("medicine.empty")}</p>
           <Link to="/medicines/new" className="btn-primary mt-5 inline-flex">
-            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-            </svg>
             {t("medicine.add_first")}
           </Link>
         </div>

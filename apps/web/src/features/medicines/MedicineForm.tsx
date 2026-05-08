@@ -184,7 +184,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
                       }}
                       className="rounded-full border-2 border-dashed border-brand px-3 py-1 text-sm font-medium text-brand transition hover:bg-brand-50 disabled:opacity-60"
                     >
-                      + {t("medicine.add_use_case", { name: query.trim() })}
+                      {t("medicine.add_use_case", { name: query.trim() })}
                     </button>,
                   );
                 }

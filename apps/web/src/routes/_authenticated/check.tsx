@@ -11,22 +11,36 @@ export const Route = createFileRoute("/_authenticated/check")({
   component: CheckPage,
 });
 
+type Mode = "useCase" | "activeIngredient";
+
 function CheckPage() {
   const { t } = useTranslation();
   const useCases = useUseCases();
   const createUseCase = useCreateUseCase();
+  const [mode, setMode] = useState<Mode>("useCase");
   const [selected, setSelected] = useState<{ id: string; name: string } | null>(null);
   const [q, setQ] = useState("");
 
   const search = useQuery<{ items: Medicine[] }>({
-    queryKey: ["search", selected?.id],
+    queryKey: ["search", "useCase", selected?.id],
     queryFn: () => api<{ items: Medicine[] }>(`/search?useCase=${selected!.id}`),
     enabled: Boolean(selected),
   });
 
+  const normalized = q.trim().toLocaleLowerCase();
+  const ingredientQuery = mode === "activeIngredient" ? q.trim() : "";
+
+  const ingredientSearch = useQuery<{ items: Medicine[] }>({
+    queryKey: ["search", "activeIngredient", ingredientQuery.toLocaleLowerCase()],
+    queryFn: () =>
+      api<{ items: Medicine[] }>(
+        `/search?activeIngredient=${encodeURIComponent(ingredientQuery)}`,
+      ),
+    enabled: mode === "activeIngredient" && ingredientQuery.length >= 2,
+  });
+
   const [showcase, setShowcase] = useState<Medicine | null>(null);
 
-  const normalized = q.trim().toLocaleLowerCase();
   const filteredUseCases = (useCases.data ?? []).filter((u) =>
     u.name.toLocaleLowerCase().includes(normalized),
   );
@@ -40,6 +54,13 @@ function CheckPage() {
     const created = await createUseCase.mutateAsync(name);
     setSelected({ id: created.id, name: created.name });
     setQ("");
+  };
+
+  const switchMode = (next: Mode) => {
+    if (next === mode) return;
+    setMode(next);
+    setQ("");
+    setSelected(null);
   };
 
   if (showcase) {
@@ -60,6 +81,37 @@ function CheckPage() {
 
       {!selected ? (
         <>
+          <div
+            role="tablist"
+            aria-label={t("check.mode_label")}
+            className="mb-4 grid grid-cols-2 gap-1 rounded-2xl border border-slate-200 bg-white p-1 shadow-soft"
+          >
+            <button
+              role="tab"
+              aria-selected={mode === "useCase"}
+              onClick={() => switchMode("useCase")}
+              className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                mode === "useCase"
+                  ? "bg-brand text-white shadow-soft"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {t("check.mode_use_case")}
+            </button>
+            <button
+              role="tab"
+              aria-selected={mode === "activeIngredient"}
+              onClick={() => switchMode("activeIngredient")}
+              className={`rounded-xl px-3 py-2 text-sm font-semibold transition ${
+                mode === "activeIngredient"
+                  ? "bg-brand text-white shadow-soft"
+                  : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              {t("check.mode_active_ingredient")}
+            </button>
+          </div>
+
           <div className="relative mb-5">
             <svg
               viewBox="0 0 24 24"
@@ -75,46 +127,94 @@ function CheckPage() {
               autoFocus
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder={t("check.search_placeholder")}
+              placeholder={
+                mode === "useCase"
+                  ? t("check.search_placeholder")
+                  : t("check.search_placeholder_ingredient")
+              }
               className="input-base py-3.5 pl-12 pr-4 text-base"
             />
           </div>
 
-          {useCases.isLoading ? (
-            <div className="grid grid-cols-2 gap-2.5">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-16 animate-pulse rounded-2xl border border-slate-200 bg-white" />
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-2 gap-2.5 animate-fade-in">
-                {filteredUseCases.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => setSelected({ id: u.id, name: u.name })}
-                    className="group rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left text-base font-medium text-slate-800 shadow-soft transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand-50 hover:text-brand-dark hover:shadow-pop"
-                  >
-                    <span className="line-clamp-2">{u.name}</span>
-                  </button>
+          {mode === "useCase" ? (
+            useCases.isLoading ? (
+              <div className="grid grid-cols-2 gap-2.5">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="h-16 animate-pulse rounded-2xl border border-slate-200 bg-white" />
                 ))}
               </div>
-              {normalized.length >= 2 && !exactExists && (
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-2.5 animate-fade-in">
+                  {filteredUseCases.map((u) => (
+                    <button
+                      key={u.id}
+                      onClick={() => setSelected({ id: u.id, name: u.name })}
+                      className="group rounded-2xl border border-slate-200 bg-white px-4 py-4 text-left text-base font-medium text-slate-800 shadow-soft transition hover:-translate-y-0.5 hover:border-brand hover:bg-brand-50 hover:text-brand-dark hover:shadow-pop"
+                    >
+                      <span className="line-clamp-2">{u.name}</span>
+                    </button>
+                  ))}
+                </div>
+                {normalized.length >= 2 && !exactExists && (
+                  <button
+                    onClick={addAndSelect}
+                    disabled={createUseCase.isPending}
+                    className="mt-3 flex w-full items-center justify-center rounded-2xl border-2 border-dashed border-brand bg-white px-4 py-4 text-base font-semibold text-brand transition hover:bg-brand-50 disabled:opacity-60"
+                  >
+                    {t("check.add_use_case", { name: q.trim() })}
+                  </button>
+                )}
+                {!useCases.isLoading && filteredUseCases.length === 0 && normalized.length < 2 && (
+                  <p className="mt-6 text-center text-sm text-slate-500">{t("check.type_to_search")}</p>
+                )}
+              </>
+            )
+          ) : ingredientQuery.length < 2 ? (
+            <p className="mt-6 text-center text-sm text-slate-500">
+              {t("check.type_ingredient_to_search")}
+            </p>
+          ) : ingredientSearch.isLoading ? (
+            <p className="text-slate-500">{t("common.loading")}</p>
+          ) : (ingredientSearch.data?.items ?? []).length === 0 ? (
+            <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 p-10 text-center">
+              <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                <svg viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M21 21l-4.3-4.3M8 11h6" strokeLinecap="round" />
+                </svg>
+              </span>
+              <p className="mt-3 text-slate-600">{t("check.no_ingredient_matches")}</p>
+            </div>
+          ) : (
+            <div className="grid gap-3 animate-fade-in">
+              {ingredientSearch.data!.items.map((m) => (
                 <button
-                  onClick={addAndSelect}
-                  disabled={createUseCase.isPending}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-brand bg-white px-4 py-4 text-base font-semibold text-brand transition hover:bg-brand-50 disabled:opacity-60"
+                  key={m.id}
+                  onClick={() => setShowcase(m)}
+                  className="group relative overflow-hidden rounded-2xl border-2 border-brand/30 bg-gradient-to-br from-white to-brand-50 p-4 text-left shadow-soft transition hover:-translate-y-0.5 hover:border-brand hover:shadow-pop"
                 >
-                  <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-                  </svg>
-                  {t("check.add_use_case", { name: q.trim() })}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xl font-bold text-slate-900">{m.name}</p>
+                      {m.activeIngredient && (
+                        <p className="text-sm font-medium text-brand-dark">{m.activeIngredient}</p>
+                      )}
+                      {m.strength && <p className="text-sm text-slate-600">{m.strength}</p>}
+                    </div>
+                    <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-brand-dark shadow-soft">
+                      {t("medicine.days_left", { count: m.daysUntilExpiry })}
+                    </span>
+                  </div>
+                  <p className="mt-3 flex items-center gap-1.5 text-sm text-slate-600">
+                    <svg viewBox="0 0 24 24" className="size-3.5 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round" />
+                    </svg>
+                    {t("medicine.quantity")}: <strong className="font-semibold text-slate-800">{m.quantity} {m.unit}</strong>
+                  </p>
                 </button>
-              )}
-              {!useCases.isLoading && filteredUseCases.length === 0 && normalized.length < 2 && (
-                <p className="mt-6 text-center text-sm text-slate-500">{t("check.type_to_search")}</p>
-              )}
-            </>
+              ))}
+            </div>
           )}
         </>
       ) : (

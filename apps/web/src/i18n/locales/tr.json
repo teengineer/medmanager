@@ -74,6 +74,7 @@
     "confirm_delete": "Bu ilacı silmek istediğine emin misin?",
     "filter": {
       "all": "Tümü",
+      "critical": "Kritik",
       "valid": "Geçerli",
       "expiring": "Yaklaşan",
       "expired": "Süresi doldu",
@@ -85,11 +86,17 @@
     "title": "Doktorda kontrol",
     "subtitle": "Hangi rahatsızlık için?",
     "search_placeholder": "Rahatsızlık ara veya yazıp ekle…",
+    "search_placeholder_ingredient": "Etken madde ara (örn. parasetamol)…",
     "no_matches": "Bu rahatsızlık için geçerli ilacın yok.",
+    "no_ingredient_matches": "Bu etken maddeyle eşleşen ilacın yok.",
     "show_doctor": "Doktora göster",
     "close": "Kapat",
     "add_use_case": "\"{{name}}\" olarak ekle",
-    "type_to_search": "Aramaya başlamak için yazın."
+    "type_to_search": "Aramaya başlamak için yazın.",
+    "type_ingredient_to_search": "Etken madde adını yazmaya başla.",
+    "mode_label": "Arama tipi",
+    "mode_use_case": "Rahatsızlık",
+    "mode_active_ingredient": "Etken madde"
   },
   "disclaimer": {
     "title": "Tıbbi Sorumluluk Reddi",
