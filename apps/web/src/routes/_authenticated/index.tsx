@@ -18,7 +18,7 @@ function HomePage() {
   const items = medicines.data?.items ?? [];
   const expired = items.filter((m) => m.isExpired).length;
   const expiring = items.filter((m) => !m.isExpired && m.daysUntilExpiry <= 30).length;
-  const valid = items.length - expired - expiring;
+  const valid = items.length - expired;
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-10">
