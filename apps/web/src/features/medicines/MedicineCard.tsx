@@ -40,6 +40,14 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
     >
       <span className={`absolute inset-y-0 left-0 w-1 ${accentBar}`} aria-hidden />
 
+      {medicine.image && (
+        <img
+          src={medicine.image}
+          alt={medicine.name}
+          className="h-20 w-20 shrink-0 rounded-lg object-contain"
+        />
+      )}
+
       <div className="flex w-full flex-col gap-2 pl-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">

@@ -60,6 +60,17 @@ function MedicineDetailPage() {
           <StatusBadge status={status} medicine={m} />
         </div>
 
+        {/* Image */}
+        {m.image && (
+          <div className="mt-6">
+            <img
+              src={m.image}
+              alt={m.name}
+              className="h-40 w-full rounded-2xl object-contain"
+            />
+          </div>
+        )}
+
         {/* Countdown */}
         <div className="mt-6 grid grid-cols-[auto_1fr] items-center gap-4">
           <CountdownTile status={status} days={m.daysUntilExpiry} />

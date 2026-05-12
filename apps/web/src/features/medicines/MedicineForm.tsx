@@ -18,6 +18,7 @@ const schema = z.object({
   quantity: z.coerce.number().min(0),
   unit: z.string().min(1).max(32),
   notes: z.string().optional(),
+  image: z.string().optional(),
   useCaseIds: z.array(z.string()).default([]),
 });
 
@@ -49,6 +50,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       quantity: initial?.quantity ?? 1,
       unit: initial?.unit ?? "tablet",
       notes: initial?.notes ?? "",
+      image: initial?.image ?? undefined,
       useCaseIds: initial?.useCases.map((u) => u.id) ?? [],
     },
   });
@@ -66,6 +68,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       quantity: values.quantity,
       unit: values.unit,
       notes: values.notes || undefined,
+      image: values.image || null,
       useCaseIds: values.useCaseIds,
     };
     await onSubmit(input);
@@ -207,10 +210,70 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         <textarea rows={2} className={inputCls} {...form.register("notes")} />
       </Field>
 
+      <ImageInput form={form} />
+
       <button type="submit" disabled={pending} className="btn-primary mt-2 w-full">
         {pending ? t("common.saving") : submitLabel}
       </button>
     </form>
+  );
+}
+
+function ImageInput({
+  form,
+}: {
+  form: ReturnType<typeof useForm<FormValues>>;
+}) {
+  const { t } = useTranslation();
+  const [preview, setPreview] = useState<string | null>(form.getValues("image") ?? null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSizeBytes = 5 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      alert(t("medicine.image_size_error"));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target?.result as string;
+      form.setValue("image", base64, { shouldDirty: true });
+      setPreview(base64);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleClearImage = () => {
+    form.setValue("image", undefined, { shouldDirty: true });
+    setPreview(null);
+  };
+
+  return (
+    <Field label={t("medicine.image")}>
+      <div className="flex flex-col gap-3">
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className={inputCls}
+        />
+        {preview && (
+          <div className="relative w-full">
+            <img src={preview} alt="Medicine" className="h-40 w-full rounded-lg object-contain" />
+            <button
+              type="button"
+              onClick={handleClearImage}
+              className="absolute right-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
+            >
+              {t("common.remove")}
+            </button>
+          </div>
+        )}
+      </div>
+    </Field>
   );
 }
 

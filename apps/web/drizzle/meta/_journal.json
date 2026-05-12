@@ -8,6 +8,13 @@
       "when": 1778152179208,
       "tag": "0000_milky_forgotten_one",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1778571527195,
+      "tag": "0001_useful_silvermane",
+      "breakpoints": true
     }
   ]
 }

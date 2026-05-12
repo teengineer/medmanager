@@ -75,6 +75,7 @@ export const Route = createFileRoute("/api/medicines/")({
             quantity: String(body.quantity),
             unit: body.unit.trim(),
             notes: body.notes?.trim() || null,
+            image: body.image ?? null,
           })
           .returning();
         if (!row) return new Response(null, { status: 500 });

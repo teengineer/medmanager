@@ -23,6 +23,7 @@ export interface MedicineDto {
   quantity: number;
   unit: string;
   notes: string | null;
+  image: string | null;
   useCases: UseCaseTag[];
 }
 
@@ -77,6 +78,7 @@ export function toMedicineDto(
     quantity: Number(m.quantity),
     unit: m.unit,
     notes: m.notes,
+    image: m.image ?? null,
     useCases: tags.map((tag) => ({
       id: tag.useCaseId,
       slug: tag.slug,

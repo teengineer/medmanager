@@ -84,6 +84,7 @@ export const medicines = sqliteTable(
     quantity: text("quantity").notNull().default("1"),
     unit: text("unit").notNull().default("unit"),
     notes: text("notes"),
+    image: text("image"),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },

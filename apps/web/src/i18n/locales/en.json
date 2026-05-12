@@ -13,7 +13,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "cancel": "Cancel",
-    "back": "Back"
+    "back": "Back",
+    "remove": "Remove"
   },
   "auth": {
     "sign_in": "Sign in",
@@ -65,6 +66,8 @@
     "add_use_case": "Add \"{{name}}\"",
     "no_use_cases": "No matches. Type something and add it.",
     "notes": "Notes",
+    "image": "Image",
+    "image_size_error": "Image size should not exceed 5MB",
     "valid": "Valid",
     "expired": "Expired",
     "expiring_in_days": "{{count}} days left",

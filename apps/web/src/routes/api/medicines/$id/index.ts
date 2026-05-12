@@ -54,6 +54,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
         if (body.quantity !== undefined) patch.quantity = String(body.quantity);
         if (body.unit !== undefined) patch.unit = body.unit.trim();
         if (body.notes !== undefined) patch.notes = body.notes?.trim() || null;
+        if (body.image !== undefined) patch.image = body.image ?? null;
 
         await db.update(medicines).set(patch).where(eq(medicines.id, id));
 

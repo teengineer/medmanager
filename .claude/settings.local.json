@@ -18,7 +18,11 @@
       "Bash(pnpm list *)",
       "PowerShell(pnpm list *)",
       "PowerShell(node -e \"try{require.resolve\\('sharp'\\);console.log\\('found'\\)}catch\\(e\\){console.log\\('missing'\\)}\")",
-      "PowerShell($src = \"C:\\\\Users\\\\Firdevs\\\\Downloads\\\\Gemini_Generated_Image_hg49vvhg49vvhg49__1_-removebg-preview.png\"; Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\($src\\); \"Width: $\\($img.Width\\), Height: $\\($img.Height\\)\"; $img.Dispose\\(\\))"
+      "PowerShell($src = \"C:\\\\Users\\\\Firdevs\\\\Downloads\\\\Gemini_Generated_Image_hg49vvhg49vvhg49__1_-removebg-preview.png\"; Add-Type -AssemblyName System.Drawing; $img = [System.Drawing.Image]::FromFile\\($src\\); \"Width: $\\($img.Width\\), Height: $\\($img.Height\\)\"; $img.Dispose\\(\\))",
+      "Bash(pnpm db:generate *)",
+      "Bash(pnpm db:migrate *)",
+      "Bash(pnpm lint *)",
+      "Bash(pnpm dev *)"
     ]
   }
 }

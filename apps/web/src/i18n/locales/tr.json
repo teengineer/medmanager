@@ -13,7 +13,8 @@
     "edit": "Düzenle",
     "delete": "Sil",
     "cancel": "İptal",
-    "back": "Geri"
+    "back": "Geri",
+    "remove": "Kaldır"
   },
   "auth": {
     "sign_in": "Giriş Yap",
@@ -64,6 +65,8 @@
     "add_use_case": "\"{{name}}\" olarak ekle",
     "no_use_cases": "Sonuç yok. Yazıp ekleyebilirsin.",
     "notes": "Notlar",
+    "image": "Resim",
+    "image_size_error": "Resim boyutu 5MB'den fazla olmamalıdır",
     "valid": "Geçerli",
     "expired": "Süresi doldu",
     "expiring_in_days": "{{count}} gün kaldı",

@@ -24,6 +24,7 @@ export interface Medicine {
   quantity: number;
   unit: string;
   notes?: string | null;
+  image?: string | null;
   useCases: UseCaseTag[];
 }
 
@@ -51,6 +52,7 @@ export interface MedicineInput {
   quantity: number;
   unit: string;
   notes?: string;
+  image?: string | null;
   useCaseIds?: string[];
 }
 
