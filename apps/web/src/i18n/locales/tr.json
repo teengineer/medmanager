@@ -66,6 +66,8 @@
     "no_use_cases": "Sonuç yok. Yazıp ekleyebilirsin.",
     "notes": "Notlar",
     "image": "Resim",
+    "image_placeholder": "Dosya seçin",
+    "image_selected": "Resim seçildi",
     "image_size_error": "Resim boyutu 5MB'den fazla olmamalıdır",
     "valid": "Geçerli",
     "expired": "Süresi doldu",

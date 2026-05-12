@@ -22,7 +22,8 @@
       "Bash(pnpm db:generate *)",
       "Bash(pnpm db:migrate *)",
       "Bash(pnpm lint *)",
-      "Bash(pnpm dev *)"
+      "Bash(pnpm dev *)",
+      "PowerShell(Get-Content *)"
     ]
   }
 }

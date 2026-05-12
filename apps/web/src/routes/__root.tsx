@@ -6,6 +6,8 @@ import {
 } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
 import { type ReactNode } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { getSession } from "~/lib/auth-session";
 import type { Session } from "~/lib/auth";
 import { DisclaimerModal } from "~/features/legal/DisclaimerModal";
@@ -51,8 +53,22 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+  const { i18n } = useTranslation();
+  const [lang, setLang] = useState("tr");
+
+  useEffect(() => {
+    setLang(i18n.language);
+    document.documentElement.lang = i18n.language;
+    const handleLanguageChanged = () => {
+      setLang(i18n.language);
+      document.documentElement.lang = i18n.language;
+    };
+    i18n.on("languageChanged", handleLanguageChanged);
+    return () => i18n.off("languageChanged", handleLanguageChanged);
+  }, [i18n]);
+
   return (
-    <html lang="tr">
+    <html lang={lang}>
       <head>
         <HeadContent />
       </head>

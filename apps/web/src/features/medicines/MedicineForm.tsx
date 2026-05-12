@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
@@ -251,22 +251,32 @@ function ImageInput({
     setPreview(null);
   };
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   return (
     <Field label={t("medicine.image")}>
       <div className="flex flex-col gap-3">
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className={inputCls}
+          className="hidden"
         />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="input-base cursor-pointer text-left"
+        >
+          {preview ? `✓ ${t("medicine.image_selected")}` : t("medicine.image_placeholder")}
+        </button>
         {preview && (
-          <div className="relative w-full">
+          <div className="flex flex-col gap-2">
             <img src={preview} alt="Medicine" className="h-40 w-full rounded-lg object-contain" />
             <button
               type="button"
               onClick={handleClearImage}
-              className="absolute right-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-medium text-white hover:bg-red-600"
+              className="w-full rounded-lg bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600"
             >
               {t("common.remove")}
             </button>

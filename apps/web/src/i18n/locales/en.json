@@ -67,6 +67,8 @@
     "no_use_cases": "No matches. Type something and add it.",
     "notes": "Notes",
     "image": "Image",
+    "image_placeholder": "Choose file",
+    "image_selected": "Image selected",
     "image_size_error": "Image size should not exceed 5MB",
     "valid": "Valid",
     "expired": "Expired",
