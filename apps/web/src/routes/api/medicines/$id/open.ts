@@ -35,7 +35,7 @@ export const Route = createFileRoute("/api/medicines/$id/open")({
           patch.openedShelfLifeDays = body.openedShelfLifeDays;
 
         await db.update(medicines).set(patch).where(eq(medicines.id, id));
-        const [entry] = await loadWithTags(userId, id);
+        const [entry] = await loadWithTags(userId, { medicineId: id });
         if (!entry) return new Response(null, { status: 404 });
         return Response.json(toMedicineDto(entry.medicine, entry.tags, locale));
       },

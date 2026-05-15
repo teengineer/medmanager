@@ -55,6 +55,8 @@
     "form_hint": "tablet, şurup, krem…",
     "quantity": "Miktar",
     "unit": "Birim",
+    "dose_per_day": "Günlük Doz",
+    "dose_per_day_hint": "Günde kaç kez",
     "expiry": "Son kullanma tarihi",
     "effective_expiry": "Kullanım sonu",
     "opened_at": "Açılma tarihi",
@@ -76,7 +78,18 @@
     "days_remaining": "gün kaldı",
     "days_unit": "gün",
     "unopened_state": "Açılmamış",
+    "profile": "Aile profili",
     "confirm_delete": "Bu ilacı silmek istediğine emin misin?",
+    "archive": "Arşivle",
+    "unarchive": "Geri Al",
+    "archived_badge": "Arşivlendi",
+    "confirm_archive": "Bu ilacı arşivlemek istediğine emin misin? Ana listeden gizlenecek.",
+    "usage_log": "Kullanım takibi",
+    "usage_taken": "Aldım",
+    "usage_skipped": "Atladım",
+    "equivalent_found": "Muadil: {{names}}",
+    "interaction_warning": "İlaç etkileşim uyarısı",
+    "interaction_dismiss": "Kapat",
     "filter": {
       "all": "Tümü",
       "critical": "Kritik",
@@ -84,7 +97,8 @@
       "expiring": "Yaklaşan",
       "expired": "Süresi doldu",
       "opened": "Açılmış",
-      "unopened": "Açılmamış"
+      "unopened": "Açılmamış",
+      "archived": "Arşiv"
     }
   },
   "check": {
@@ -120,6 +134,43 @@
     "enabled": "Bildirimler açık",
     "expiry_title": "İlaç son kullanma uyarısı",
     "expiry_body": "{{name}} — {{days}} gün içinde sona eriyor."
+  },
+  "family_profiles": {
+    "title": "Aile Profilleri",
+    "add": "Profil Ekle",
+    "empty": "Henüz aile profili eklemedin.",
+    "name": "İsim",
+    "relation": "Yakınlık",
+    "relation_placeholder": "Eş, anne, çocuk…",
+    "color": "Renk",
+    "confirm_delete": "Bu profili silmek istediğine emin misin?",
+    "edit": "Profili düzenle",
+    "saving": "Kaydediliyor…"
+  },
+  "prescriptions": {
+    "title": "Reçetelerim",
+    "add": "Reçete Ekle",
+    "empty": "Henüz reçete kaydın yok.",
+    "doctor_name": "Doktor adı",
+    "date": "Tarih",
+    "notes": "Notlar",
+    "profile": "Kişi",
+    "medicines_in_prescription": "Reçetedeki ilaçlar",
+    "add_medicine_row": "İlaç ekle",
+    "remove_medicine_row": "Kaldır",
+    "medicine_count": "{{count}} ilaç",
+    "confirm_delete": "Bu reçeteyi silmek istediğine emin misin?",
+    "no_profile": "Genel"
+  },
+  "doctor_visit": {
+    "title": "Doktor Görüşmesi",
+    "subtitle": "İlaç envanterim",
+    "print": "Yazdır",
+    "no_medicines": "Aktif ilacın bulunmuyor.",
+    "general": "Genel",
+    "disclaimer": "Bu liste bilgi amaçlıdır. Tıbbi tavsiye değildir.",
+    "expired_section": "Süresi Dolmuş",
+    "interactions_found": "{{count}} etkileşim tespit edildi"
   },
   "about": {
     "title": "Hakkında",

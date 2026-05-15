@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MedicineCard } from "../../../features/medicines/MedicineCard";
 import { useMedicines } from "../../../features/medicines/hooks";
+import { useProfiles } from "../../../features/profiles/hooks";
+import { detectInteractions } from "../../../lib/interactions";
 
 const FILTERS = [
   "all",
@@ -12,6 +14,7 @@ const FILTERS = [
   "expired",
   "opened",
   "unopened",
+  "archived",
 ] as const;
 type Filter = (typeof FILTERS)[number];
 
@@ -27,28 +30,64 @@ export const Route = createFileRoute("/_authenticated/medicines/")({
 });
 
 function MedicinesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { filter = "all" } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [q, setQ] = useState("");
+  const [activeProfileId, setActiveProfileId] = useState<string | undefined>(undefined);
+  const [showInteractionBanner, setShowInteractionBanner] = useState(true);
+  const profiles = useProfiles();
 
   const setFilter = (f: Filter) => {
     void navigate({ search: f === "all" ? {} : { filter: f }, replace: true });
   };
 
-  const params: Parameters<typeof useMedicines>[0] = { q: q || undefined };
-  if (filter === "valid") params.expired = false;
-  if (filter === "expired") params.expired = true;
-  if (filter === "opened") params.opened = true;
-  if (filter === "unopened") params.opened = false;
+  const isArchived = filter === "archived";
+
+  const params: Parameters<typeof useMedicines>[0] = { q: q || undefined, profileId: activeProfileId };
+  if (isArchived) {
+    params.archived = true;
+  } else {
+    if (filter === "valid") params.expired = false;
+    if (filter === "expired") params.expired = true;
+    if (filter === "opened") params.opened = true;
+    if (filter === "unopened") params.opened = false;
+  }
 
   const medicines = useMedicines(params);
 
   const items = (medicines.data?.items ?? []).filter((m) => {
+    if (isArchived) return true;
     if (filter === "expiring") return !m.isExpired && m.daysUntilExpiry <= 30;
     if (filter === "critical") return m.isExpired || m.daysUntilExpiry <= 30;
     return true;
   });
+
+  // Build muadil (equivalent) map — only for non-archived items
+  const equivalentMap = new Map<string, string[]>();
+  if (!isArchived) {
+    const activeItems = items.filter((m) => !m.archivedAt && !m.isExpired);
+    const ingredientToMeds = new Map<string, typeof activeItems>();
+    for (const m of activeItems) {
+      if (!m.activeIngredient) continue;
+      const key = m.activeIngredient.trim().toLowerCase();
+      if (!ingredientToMeds.has(key)) ingredientToMeds.set(key, []);
+      ingredientToMeds.get(key)!.push(m);
+    }
+    for (const [, group] of ingredientToMeds) {
+      if (group.length < 2) continue;
+      for (const m of group) {
+        equivalentMap.set(
+          m.id,
+          group.filter((other) => other.id !== m.id).map((other) => other.name),
+        );
+      }
+    }
+  }
+
+  // Detect drug interactions
+  const interactions = !isArchived ? detectInteractions(items) : [];
+  const isTr = i18n.language.startsWith("tr");
 
   return (
     <main className="mx-auto max-w-3xl p-4 pb-24 sm:p-6">
@@ -99,6 +138,44 @@ function MedicinesPage() {
         )}
       </div>
 
+      {profiles.data && profiles.data.length > 0 && (
+        <div className="mb-3 -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
+          <button
+            onClick={() => setActiveProfileId(undefined)}
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+              activeProfileId === undefined
+                ? "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
+                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+            }`}
+          >
+            {t("medicine.filter.all")}
+          </button>
+          {profiles.data.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setActiveProfileId(p.id === activeProfileId ? undefined : p.id)}
+              className={`shrink-0 flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                activeProfileId === p.id
+                  ? p.color
+                    ? "border-transparent text-white shadow-brand"
+                    : "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+              }`}
+              style={activeProfileId === p.id && p.color ? { backgroundColor: p.color, borderColor: p.color } : undefined}
+            >
+              {p.color && (
+                <span
+                  className="size-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: p.color }}
+                  aria-hidden
+                />
+              )}
+              {p.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="mb-5 -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
         {FILTERS.map((f) => (
           <button
@@ -115,6 +192,43 @@ function MedicinesPage() {
         ))}
       </div>
 
+      {/* Interaction warning banner */}
+      {!isArchived && showInteractionBanner && interactions.length > 0 && (
+        <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 animate-fade-in">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2">
+              <svg viewBox="0 0 24 24" className="mt-0.5 size-5 shrink-0 text-amber-700" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeLinejoin="round" />
+                <line x1="12" y1="9" x2="12" y2="13" strokeLinecap="round" />
+                <line x1="12" y1="17" x2="12.01" y2="17" strokeLinecap="round" />
+              </svg>
+              <div>
+                <p className="text-sm font-semibold text-amber-900">{t("medicine.interaction_warning")}</p>
+                <ul className="mt-1 space-y-0.5">
+                  {interactions.slice(0, 3).map((ix, idx) => (
+                    <li key={idx} className="text-xs text-amber-800">
+                      {ix.med1Name} + {ix.med2Name} — {isTr ? ix.descriptionTr : ix.descriptionEn}
+                    </li>
+                  ))}
+                  {interactions.length > 3 && (
+                    <li className="text-xs text-amber-700">
+                      {t("doctor_visit.interactions_found", { count: interactions.length })}
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowInteractionBanner(false)}
+              className="shrink-0 text-xs font-medium text-amber-700 hover:text-amber-900"
+            >
+              {t("medicine.interaction_dismiss")}
+            </button>
+          </div>
+        </div>
+      )}
+
       {medicines.isLoading ? (
         <div className="grid gap-3">
           {[1, 2, 3].map((i) => (
@@ -129,16 +243,30 @@ function MedicinesPage() {
               <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" strokeLinecap="round" />
             </svg>
           </span>
-          <p className="mt-3 font-medium text-slate-700">{t("medicine.empty")}</p>
-          <Link to="/medicines/new" className="btn-primary mt-5 inline-flex">
-            {t("medicine.add_first")}
-          </Link>
+          <p className="mt-3 font-medium text-slate-700">
+            {isArchived ? t("medicine.filter.archived") + " — " + t("medicine.empty") : t("medicine.empty")}
+          </p>
+          {!isArchived && (
+            <Link to="/medicines/new" className="btn-primary mt-5 inline-flex">
+              {t("medicine.add_first")}
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 animate-fade-in">
-          {items.map((m) => (
-            <MedicineCard key={m.id} medicine={m} />
-          ))}
+          {items.map((m) => {
+            const equivalents = equivalentMap.get(m.id);
+            return (
+              <div key={m.id}>
+                <MedicineCard medicine={m} />
+                {equivalents && equivalents.length > 0 && (
+                  <p className="mt-1 px-1 text-xs text-amber-700">
+                    {t("medicine.equivalent_found", { names: equivalents.join(", ") })}
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </main>

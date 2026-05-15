@@ -3,10 +3,12 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { useProfiles } from "../profiles/hooks";
 import { useCreateUseCase, useUseCases, type Medicine, type MedicineInput } from "./hooks";
 
 const schema = z.object({
   name: z.string().min(1).max(200),
+  profileId: z.string().optional(),
   activeIngredient: z.string().optional(),
   strength: z.string().optional(),
   form: z.string().optional(),
@@ -17,6 +19,9 @@ const schema = z.object({
     .optional(),
   quantity: z.coerce.number().min(0),
   unit: z.string().min(1).max(32),
+  dosePerDay: z
+    .union([z.string().length(0), z.coerce.number().int().positive()])
+    .optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
   useCaseIds: z.array(z.string()).default([]),
@@ -35,12 +40,14 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const { t } = useTranslation();
   const useCases = useUseCases();
   const createUseCase = useCreateUseCase();
+  const profiles = useProfiles();
   const [query, setQuery] = useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: initial?.name ?? "",
+      profileId: initial?.profileId ?? "",
       activeIngredient: initial?.activeIngredient ?? "",
       strength: initial?.strength ?? "",
       form: initial?.form ?? "",
@@ -49,6 +56,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       openedShelfLifeDays: initial?.openedShelfLifeDays ?? undefined,
       quantity: initial?.quantity ?? 1,
       unit: initial?.unit ?? "tablet",
+      dosePerDay: initial?.dosePerDay ?? undefined,
       notes: initial?.notes ?? "",
       image: initial?.image ?? undefined,
       useCaseIds: initial?.useCases.map((u) => u.id) ?? [],
@@ -58,6 +66,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const handle = form.handleSubmit(async (values) => {
     const input: MedicineInput = {
       name: values.name,
+      profileId: values.profileId || null,
       activeIngredient: values.activeIngredient || undefined,
       strength: values.strength || undefined,
       form: values.form || undefined,
@@ -67,6 +76,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         typeof values.openedShelfLifeDays === "number" ? values.openedShelfLifeDays : null,
       quantity: values.quantity,
       unit: values.unit,
+      dosePerDay: typeof values.dosePerDay === "number" ? values.dosePerDay : null,
       notes: values.notes || undefined,
       image: values.image || null,
       useCaseIds: values.useCaseIds,
@@ -76,6 +86,20 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
 
   return (
     <form onSubmit={handle} className="flex flex-col gap-4">
+      {profiles.data && profiles.data.length > 0 && (
+        <Field label={t("prescriptions.profile")}>
+          <select className={inputCls} {...form.register("profileId")}>
+            <option value="">—</option>
+            {profiles.data.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+                {p.relation ? ` (${p.relation})` : ""}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+
       <Field label={t("medicine.name")} error={form.formState.errors.name?.message}>
         <input className={inputCls} {...form.register("name")} />
       </Field>
@@ -101,6 +125,16 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
           <input className={inputCls} {...form.register("unit")} />
         </Field>
       </div>
+
+      <Field label={t("medicine.dose_per_day")}>
+        <input
+          type="number"
+          min="1"
+          className={inputCls}
+          placeholder={t("medicine.dose_per_day_hint")}
+          {...form.register("dosePerDay")}
+        />
+      </Field>
 
       <Field label={t("medicine.expiry")}>
         <input type="date" className={inputCls} {...form.register("expiryDate")} />

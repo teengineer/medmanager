@@ -25,7 +25,10 @@ export const Route = createFileRoute("/api/medicines/")({
 
         const userId = session.user.id;
         const locale = await resolveLocale(userId, request.headers.get("accept-language"));
-        let data = await loadWithTags(userId);
+        let data = await loadWithTags(userId, {
+          profileId: parsed.data.profileId,
+          includeArchived: parsed.data.archived === "true",
+        });
 
         const params = parsed.data;
         if (params.q) {
@@ -64,6 +67,7 @@ export const Route = createFileRoute("/api/medicines/")({
           .insert(medicines)
           .values({
             userId,
+            profileId: body.profileId ?? null,
             name: body.name.trim(),
             activeIngredient: body.activeIngredient?.trim() || null,
             strength: body.strength?.trim() || null,
@@ -74,6 +78,7 @@ export const Route = createFileRoute("/api/medicines/")({
             openedShelfLifeDays: body.openedShelfLifeDays ?? null,
             quantity: String(body.quantity),
             unit: body.unit.trim(),
+            dosePerDay: body.dosePerDay ?? null,
             notes: body.notes?.trim() || null,
             image: body.image ?? null,
           })
@@ -87,7 +92,7 @@ export const Route = createFileRoute("/api/medicines/")({
             .values(unique.map((useCaseId) => ({ medicineId: row.id, useCaseId })));
         }
 
-        const [entry] = await loadWithTags(userId, row.id);
+        const [entry] = await loadWithTags(userId, { medicineId: row.id });
         if (!entry) return new Response(null, { status: 500 });
         return Response.json(toMedicineDto(entry.medicine, entry.tags, locale), { status: 201 });
       },

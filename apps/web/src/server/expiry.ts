@@ -1,4 +1,4 @@
-import { eq, lte } from "drizzle-orm";
+import { and, eq, isNull, lte } from "drizzle-orm";
 import webpush from "web-push";
 import { db } from "~/db";
 import { medicines, pushSubscriptions, user as userTable } from "~/db/schema";
@@ -27,7 +27,7 @@ export async function runExpiryTick(now = new Date()): Promise<{ sent: number; p
     .select({ medicine: medicines, user: userTable })
     .from(medicines)
     .innerJoin(userTable, eq(userTable.id, medicines.userId))
-    .where(lte(medicines.expiryDate, upperBound));
+    .where(and(lte(medicines.expiryDate, upperBound), isNull(medicines.archivedAt)));
 
   let sent = 0;
   let pruned = 0;

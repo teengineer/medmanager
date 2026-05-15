@@ -8,6 +8,7 @@ export interface UseCaseTag {
 
 export interface MedicineDto {
   id: string;
+  profileId: string | null;
   name: string;
   activeIngredient: string | null;
   strength: string | null;
@@ -22,8 +23,10 @@ export interface MedicineDto {
   isOpened: boolean;
   quantity: number;
   unit: string;
+  dosePerDay: number | null;
   notes: string | null;
   image: string | null;
+  archivedAt: string | null;
   useCases: UseCaseTag[];
 }
 
@@ -63,6 +66,7 @@ export function toMedicineDto(
   const days = Math.round((effDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
   return {
     id: m.id,
+    profileId: m.profileId ?? null,
     name: m.name,
     activeIngredient: m.activeIngredient,
     strength: m.strength,
@@ -77,8 +81,10 @@ export function toMedicineDto(
     isOpened: Boolean(m.openedAt),
     quantity: Number(m.quantity),
     unit: m.unit,
+    dosePerDay: m.dosePerDay ?? null,
     notes: m.notes,
     image: m.image ?? null,
+    archivedAt: m.archivedAt ?? null,
     useCases: tags.map((tag) => ({
       id: tag.useCaseId,
       slug: tag.slug,

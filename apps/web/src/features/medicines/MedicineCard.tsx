@@ -1,9 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
+import { useProfiles } from "../profiles/hooks";
 import type { Medicine } from "./hooks";
 
 export function MedicineCard({ medicine }: { medicine: Medicine }) {
   const { t } = useTranslation();
+  const profiles = useProfiles();
+  const profile = medicine.profileId
+    ? profiles.data?.find((p) => p.id === medicine.profileId)
+    : undefined;
 
   const status = medicine.isExpired
     ? "expired"
@@ -15,22 +20,22 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
     status === "expired"
       ? "bg-slate-300"
       : status === "expiring"
-        ? "bg-amber-400"
-        : "bg-brand";
+        ? "bg-red-400"
+        : "bg-yellow-400";
 
   const badgeCls =
     status === "expired"
       ? "bg-slate-100 text-slate-600 border-slate-200"
       : status === "expiring"
-        ? "bg-amber-50 text-amber-800 border-amber-200"
-        : "bg-brand-light text-brand-dark border-brand/20";
+        ? "bg-red-50 text-red-700 border-red-200"
+        : "bg-yellow-50 text-yellow-700 border-yellow-200";
 
   const dotCls =
     status === "expired"
       ? "bg-slate-400"
       : status === "expiring"
-        ? "bg-amber-500"
-        : "bg-brand";
+        ? "bg-red-500"
+        : "bg-yellow-500";
 
   return (
     <Link
@@ -51,9 +56,19 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
       <div className="flex w-full flex-col gap-2 pl-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className={`truncate text-lg font-semibold ${status === "expired" ? "text-slate-500" : "text-slate-900"}`}>
-              {medicine.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              {profile?.color && (
+                <span
+                  className="size-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: profile.color }}
+                  title={profile.name}
+                  aria-label={profile.name}
+                />
+              )}
+              <h3 className={`truncate text-lg font-semibold ${status === "expired" ? "text-slate-500" : "text-slate-900"}`}>
+                {medicine.name}
+              </h3>
+            </div>
             {medicine.strength && (
               <p className="text-sm text-slate-500">{medicine.strength}</p>
             )}
