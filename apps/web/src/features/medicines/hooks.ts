@@ -24,6 +24,7 @@ export interface Medicine {
   isOpened: boolean;
   quantity: number;
   unit: string;
+  dosePerDay?: number | null;
   notes?: string | null;
   image?: string | null;
   archivedAt?: string | null;
@@ -54,6 +55,7 @@ export interface MedicineInput {
   openedShelfLifeDays?: number | null;
   quantity: number;
   unit: string;
+  dosePerDay?: number | null;
   notes?: string;
   image?: string | null;
   useCaseIds?: string[];

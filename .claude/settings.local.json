@@ -23,7 +23,22 @@
       "Bash(pnpm db:migrate *)",
       "Bash(pnpm lint *)",
       "Bash(pnpm dev *)",
-      "PowerShell(Get-Content *)"
+      "PowerShell(Get-Content *)",
+      "Bash(git checkout *)",
+      "Skill(a-backend-developer)",
+      "Bash(New-Item -ItemType Directory -Force \"D:\\\\Repositories\\\\medmanager\\\\apps\\\\web\\\\src\\\\routes\\\\api\\\\profiles\")",
+      "Bash(Out-Null)",
+      "Bash(pnpm --filter web db:generate)",
+      "Bash(pnpm --filter web db:migrate)",
+      "Bash(pnpm --filter web typecheck)",
+      "Bash(pnpm --filter web exec tsr generate)",
+      "Bash(npx @tanstack/router-cli generate)",
+      "Bash(node_modules/.bin/tsr generate *)",
+      "Skill(a-frontend-developer)",
+      "Skill(a-review-test-manager)",
+      "Bash(pnpm --filter web lint)",
+      "Bash(git diff *)",
+      "Bash(pnpm build *)"
     ]
   }
 }

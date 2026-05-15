@@ -18,6 +18,7 @@ export const createSchema = z.object({
   openedShelfLifeDays: z.number().int().positive().nullable().optional(),
   quantity: z.number().min(0),
   unit: z.string().min(1).max(32),
+  dosePerDay: z.number().int().positive().nullable().optional(),
   notes: z.string().max(1000).nullable().optional(),
   image: z.string().max(10_000_000).nullable().optional(),
   useCaseIds: z.array(z.string()).optional(),

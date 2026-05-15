@@ -102,6 +102,7 @@ export const medicines = sqliteTable(
     openedShelfLifeDays: integer("opened_shelf_life_days"),
     quantity: text("quantity").notNull().default("1"),
     unit: text("unit").notNull().default("unit"),
+    dosePerDay: integer("dose_per_day"),
     notes: text("notes"),
     image: text("image"),
     archivedAt: text("archived_at"),

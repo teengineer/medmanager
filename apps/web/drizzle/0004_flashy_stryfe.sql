@@ -1,0 +1,1 @@
+ALTER TABLE `medicines` ADD `dose_per_day` integer;

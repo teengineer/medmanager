@@ -24,7 +24,20 @@ function MedicineDetailPage() {
   const open = useOpenMedicine();
   const del = useDeleteMedicine();
   const archive = useArchiveMedicine();
-  const usageLogs = useUsageLogs(id);
+  const computedDaysWindow = (() => {
+    const m = medicine.data;
+    if (!m) return 14;
+    if (m.dosePerDay && m.dosePerDay > 0) {
+      const strengthNum = m.strength ? parseFloat(m.strength) : NaN;
+      const dailyAmount =
+        isFinite(strengthNum) && strengthNum > 0
+          ? m.dosePerDay * strengthNum
+          : m.dosePerDay;
+      return Math.min(Math.ceil(m.quantity / dailyAmount), 90);
+    }
+    return 14;
+  })();
+  const usageLogs = useUsageLogs(id, computedDaysWindow);
   const logUsage = useLogUsage(id);
 
   if (medicine.isLoading) {
@@ -45,10 +58,9 @@ function MedicineDetailPage() {
 
   const today = new Date().toISOString().slice(0, 10);
 
-  // Build 14-day array from 13 days ago to today
-  const days = Array.from({ length: 14 }, (_, i) => {
+  const days = Array.from({ length: computedDaysWindow }, (_, i) => {
     const d = new Date();
-    d.setDate(d.getDate() - (13 - i));
+    d.setDate(d.getDate() - (computedDaysWindow - 1 - i));
     return d.toISOString().slice(0, 10);
   });
 
@@ -109,9 +121,6 @@ function MedicineDetailPage() {
                     style={{ backgroundColor: profile.color ?? "#94a3b8" }}
                   />
                   {profile.name}
-                  {profile.relation && (
-                    <span className="opacity-70">· {profile.relation}</span>
-                  )}
                 </span>
               </div>
             )}

@@ -19,6 +19,9 @@ const schema = z.object({
     .optional(),
   quantity: z.coerce.number().min(0),
   unit: z.string().min(1).max(32),
+  dosePerDay: z
+    .union([z.string().length(0), z.coerce.number().int().positive()])
+    .optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
   useCaseIds: z.array(z.string()).default([]),
@@ -53,6 +56,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       openedShelfLifeDays: initial?.openedShelfLifeDays ?? undefined,
       quantity: initial?.quantity ?? 1,
       unit: initial?.unit ?? "tablet",
+      dosePerDay: initial?.dosePerDay ?? undefined,
       notes: initial?.notes ?? "",
       image: initial?.image ?? undefined,
       useCaseIds: initial?.useCases.map((u) => u.id) ?? [],
@@ -72,6 +76,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         typeof values.openedShelfLifeDays === "number" ? values.openedShelfLifeDays : null,
       quantity: values.quantity,
       unit: values.unit,
+      dosePerDay: typeof values.dosePerDay === "number" ? values.dosePerDay : null,
       notes: values.notes || undefined,
       image: values.image || null,
       useCaseIds: values.useCaseIds,
@@ -120,6 +125,16 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
           <input className={inputCls} {...form.register("unit")} />
         </Field>
       </div>
+
+      <Field label={t("medicine.dose_per_day")}>
+        <input
+          type="number"
+          min="1"
+          className={inputCls}
+          placeholder={t("medicine.dose_per_day_hint")}
+          {...form.register("dosePerDay")}
+        />
+      </Field>
 
       <Field label={t("medicine.expiry")}>
         <input type="date" className={inputCls} {...form.register("expiryDate")} />

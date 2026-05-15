@@ -23,6 +23,7 @@ export interface MedicineDto {
   isOpened: boolean;
   quantity: number;
   unit: string;
+  dosePerDay: number | null;
   notes: string | null;
   image: string | null;
   archivedAt: string | null;
@@ -80,6 +81,7 @@ export function toMedicineDto(
     isOpened: Boolean(m.openedAt),
     quantity: Number(m.quantity),
     unit: m.unit,
+    dosePerDay: m.dosePerDay ?? null,
     notes: m.notes,
     image: m.image ?? null,
     archivedAt: m.archivedAt ?? null,

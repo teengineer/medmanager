@@ -55,6 +55,8 @@
     "form_hint": "tablet, şurup, krem…",
     "quantity": "Miktar",
     "unit": "Birim",
+    "dose_per_day": "Günlük Doz",
+    "dose_per_day_hint": "Günde kaç kez",
     "expiry": "Son kullanma tarihi",
     "effective_expiry": "Kullanım sonu",
     "opened_at": "Açılma tarihi",

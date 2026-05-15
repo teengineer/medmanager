@@ -56,6 +56,8 @@
     "form_hint": "tablet, syrup, cream…",
     "quantity": "Quantity",
     "unit": "Unit",
+    "dose_per_day": "Daily Dose",
+    "dose_per_day_hint": "Times per day",
     "expiry": "Expiry date",
     "effective_expiry": "Use-by",
     "opened_at": "Opened at",
