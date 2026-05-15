@@ -29,6 +29,12 @@ export function AppHeader() {
           <NavLink to="/check" active={pathname.startsWith("/check")} icon={<CheckIcon />}>
             {t("check.title")}
           </NavLink>
+          <NavLink to="/family-profiles" active={pathname.startsWith("/family-profiles")} icon={<PeopleIcon />}>
+            {t("family_profiles.title")}
+          </NavLink>
+          <NavLink to="/prescriptions" active={pathname.startsWith("/prescriptions")} icon={<RxIcon />}>
+            {t("prescriptions.title")}
+          </NavLink>
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
@@ -50,6 +56,12 @@ export function AppHeader() {
         </NavLink>
         <NavLink to="/check" active={pathname.startsWith("/check")} icon={<CheckIcon />}>
           {t("check.title")}
+        </NavLink>
+        <NavLink to="/family-profiles" active={pathname.startsWith("/family-profiles")} icon={<PeopleIcon />}>
+          {t("family_profiles.title")}
+        </NavLink>
+        <NavLink to="/prescriptions" active={pathname.startsWith("/prescriptions")} icon={<RxIcon />}>
+          {t("prescriptions.title")}
         </NavLink>
       </nav>
 
@@ -274,6 +286,27 @@ function LogoutIcon() {
     <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function PeopleIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <circle cx="9" cy="7" r="3" />
+      <path d="M3 21v-1a6 6 0 0112 0v1" strokeLinecap="round" />
+      <circle cx="17" cy="8" r="2.5" />
+      <path d="M21 21v-0.5a4.5 4.5 0 00-5-4.47" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function RxIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" strokeLinecap="round" />
+      <rect x="9" y="3" width="6" height="4" rx="1" />
+      <path d="M9 12h6M9 16h4" strokeLinecap="round" />
     </svg>
   );
 }

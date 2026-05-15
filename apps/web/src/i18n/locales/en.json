@@ -122,6 +122,33 @@
     "expiry_title": "Medicine expiry warning",
     "expiry_body": "{{name}} — expires in {{days}} days."
   },
+  "family_profiles": {
+    "title": "Family Profiles",
+    "add": "Add Profile",
+    "empty": "No family profiles yet.",
+    "name": "Name",
+    "relation": "Relation",
+    "relation_placeholder": "Spouse, parent, child…",
+    "color": "Color",
+    "confirm_delete": "Are you sure you want to delete this profile?",
+    "edit": "Edit profile",
+    "saving": "Saving…"
+  },
+  "prescriptions": {
+    "title": "My Prescriptions",
+    "add": "Add Prescription",
+    "empty": "No prescriptions yet.",
+    "doctor_name": "Doctor name",
+    "date": "Date",
+    "notes": "Notes",
+    "profile": "Person",
+    "medicines_in_prescription": "Medicines in prescription",
+    "add_medicine_row": "Add medicine",
+    "remove_medicine_row": "Remove",
+    "medicine_count": "{{count}} medicine",
+    "confirm_delete": "Are you sure you want to delete this prescription?",
+    "no_profile": "General"
+  },
   "about": {
     "title": "About",
     "description": "MedManager is a personal app for tracking your household medicines. Open-source.",

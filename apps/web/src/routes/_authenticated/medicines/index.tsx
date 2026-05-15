@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MedicineCard } from "../../../features/medicines/MedicineCard";
 import { useMedicines } from "../../../features/medicines/hooks";
+import { useProfiles } from "../../../features/profiles/hooks";
 
 const FILTERS = [
   "all",
@@ -31,12 +32,14 @@ function MedicinesPage() {
   const { filter = "all" } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [q, setQ] = useState("");
+  const [activeProfileId, setActiveProfileId] = useState<string | undefined>(undefined);
+  const profiles = useProfiles();
 
   const setFilter = (f: Filter) => {
     void navigate({ search: f === "all" ? {} : { filter: f }, replace: true });
   };
 
-  const params: Parameters<typeof useMedicines>[0] = { q: q || undefined };
+  const params: Parameters<typeof useMedicines>[0] = { q: q || undefined, profileId: activeProfileId };
   if (filter === "valid") params.expired = false;
   if (filter === "expired") params.expired = true;
   if (filter === "opened") params.opened = true;
@@ -98,6 +101,44 @@ function MedicinesPage() {
           </button>
         )}
       </div>
+
+      {profiles.data && profiles.data.length > 0 && (
+        <div className="mb-3 -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
+          <button
+            onClick={() => setActiveProfileId(undefined)}
+            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+              activeProfileId === undefined
+                ? "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
+                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+            }`}
+          >
+            {t("medicine.filter.all")}
+          </button>
+          {profiles.data.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setActiveProfileId(p.id === activeProfileId ? undefined : p.id)}
+              className={`shrink-0 flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                activeProfileId === p.id
+                  ? p.color
+                    ? "border-transparent text-white shadow-brand"
+                    : "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
+                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+              }`}
+              style={activeProfileId === p.id && p.color ? { backgroundColor: p.color, borderColor: p.color } : undefined}
+            >
+              {p.color && (
+                <span
+                  className="size-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: p.color }}
+                  aria-hidden
+                />
+              )}
+              {p.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="mb-5 -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
         {FILTERS.map((f) => (

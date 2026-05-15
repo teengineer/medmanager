@@ -3,10 +3,12 @@ import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { useProfiles } from "../profiles/hooks";
 import { useCreateUseCase, useUseCases, type Medicine, type MedicineInput } from "./hooks";
 
 const schema = z.object({
   name: z.string().min(1).max(200),
+  profileId: z.string().optional(),
   activeIngredient: z.string().optional(),
   strength: z.string().optional(),
   form: z.string().optional(),
@@ -35,12 +37,14 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const { t } = useTranslation();
   const useCases = useUseCases();
   const createUseCase = useCreateUseCase();
+  const profiles = useProfiles();
   const [query, setQuery] = useState("");
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: initial?.name ?? "",
+      profileId: initial?.profileId ?? "",
       activeIngredient: initial?.activeIngredient ?? "",
       strength: initial?.strength ?? "",
       form: initial?.form ?? "",
@@ -58,6 +62,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const handle = form.handleSubmit(async (values) => {
     const input: MedicineInput = {
       name: values.name,
+      profileId: values.profileId || null,
       activeIngredient: values.activeIngredient || undefined,
       strength: values.strength || undefined,
       form: values.form || undefined,
@@ -76,6 +81,20 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
 
   return (
     <form onSubmit={handle} className="flex flex-col gap-4">
+      {profiles.data && profiles.data.length > 0 && (
+        <Field label={t("prescriptions.profile")}>
+          <select className={inputCls} {...form.register("profileId")}>
+            <option value="">—</option>
+            {profiles.data.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+                {p.relation ? ` (${p.relation})` : ""}
+              </option>
+            ))}
+          </select>
+        </Field>
+      )}
+
       <Field label={t("medicine.name")} error={form.formState.errors.name?.message}>
         <input className={inputCls} {...form.register("name")} />
       </Field>

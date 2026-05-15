@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines, useCases } from "~/db/schema";
@@ -8,6 +8,7 @@ export const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Must be YYYY-
 
 export const createSchema = z.object({
   name: z.string().min(1).max(200),
+  profileId: z.string().nullable().optional(),
   activeIngredient: z.string().max(200).nullable().optional(),
   strength: z.string().max(50).nullable().optional(),
   form: z.string().max(50).nullable().optional(),
@@ -33,6 +34,7 @@ export const openSchema = z.object({
 export const listQuerySchema = z.object({
   q: z.string().optional(),
   useCase: z.string().optional(),
+  profileId: z.string().optional(),
   expired: z
     .union([z.literal("true"), z.literal("false")])
     .transform((v) => v === "true")
@@ -43,10 +45,17 @@ export const listQuerySchema = z.object({
     .optional(),
 });
 
-export async function loadWithTags(userId: string, medicineId?: string) {
-  const whereClause = medicineId
-    ? and(eq(medicines.userId, userId), eq(medicines.id, medicineId))
-    : eq(medicines.userId, userId);
+export async function loadWithTags(userId: string, medicineId?: string, profileId?: string) {
+  let whereClause;
+  if (medicineId) {
+    whereClause = and(eq(medicines.userId, userId), eq(medicines.id, medicineId));
+  } else if (profileId === "none") {
+    whereClause = and(eq(medicines.userId, userId), isNull(medicines.profileId));
+  } else if (profileId) {
+    whereClause = and(eq(medicines.userId, userId), eq(medicines.profileId, profileId));
+  } else {
+    whereClause = eq(medicines.userId, userId);
+  }
   const rows = await db.select().from(medicines).where(whereClause).orderBy(asc(medicines.expiryDate));
   if (rows.length === 0) return [];
 

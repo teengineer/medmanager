@@ -9,6 +9,7 @@ export interface UseCaseTag {
 
 export interface Medicine {
   id: string;
+  profileId?: string | null;
   name: string;
   activeIngredient?: string | null;
   strength?: string | null;
@@ -42,6 +43,7 @@ export interface UseCase {
 
 export interface MedicineInput {
   name: string;
+  profileId?: string | null;
   activeIngredient?: string;
   strength?: string;
   form?: string;
@@ -59,16 +61,17 @@ export interface MedicineInput {
 const MEDICINES_KEY = ["medicines"] as const;
 const USE_CASES_KEY = ["use-cases"] as const;
 
-export function useMedicines(params: { q?: string; useCase?: string; expired?: boolean; opened?: boolean } = {}) {
+export function useMedicines(params: { q?: string; useCase?: string; expired?: boolean; opened?: boolean; profileId?: string } = {}) {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
   if (params.useCase) search.set("useCase", params.useCase);
   if (params.expired !== undefined) search.set("expired", String(params.expired));
   if (params.opened !== undefined) search.set("opened", String(params.opened));
+  if (params.profileId) search.set("profileId", params.profileId);
   const suffix = search.toString() ? `?${search}` : "";
   return useQuery<MedicineListResponse>({
     queryKey: [...MEDICINES_KEY, params],
-    queryFn: () => api<MedicineListResponse>(`/medicines${suffix}`),
+    queryFn: () => api<MedicineListResponse>(`/medicines/${suffix}`),
   });
 }
 

@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/medicines/")({
 
         const userId = session.user.id;
         const locale = await resolveLocale(userId, request.headers.get("accept-language"));
-        let data = await loadWithTags(userId);
+        let data = await loadWithTags(userId, undefined, parsed.data.profileId);
 
         const params = parsed.data;
         if (params.q) {
@@ -64,6 +64,7 @@ export const Route = createFileRoute("/api/medicines/")({
           .insert(medicines)
           .values({
             userId,
+            profileId: body.profileId ?? null,
             name: body.name.trim(),
             activeIngredient: body.activeIngredient?.trim() || null,
             strength: body.strength?.trim() || null,

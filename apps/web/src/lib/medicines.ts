@@ -8,6 +8,7 @@ export interface UseCaseTag {
 
 export interface MedicineDto {
   id: string;
+  profileId: string | null;
   name: string;
   activeIngredient: string | null;
   strength: string | null;
@@ -63,6 +64,7 @@ export function toMedicineDto(
   const days = Math.round((effDate.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
   return {
     id: m.id,
+    profileId: m.profileId ?? null,
     name: m.name,
     activeIngredient: m.activeIngredient,
     strength: m.strength,

@@ -121,6 +121,33 @@
     "expiry_title": "İlaç son kullanma uyarısı",
     "expiry_body": "{{name}} — {{days}} gün içinde sona eriyor."
   },
+  "family_profiles": {
+    "title": "Aile Profilleri",
+    "add": "Profil Ekle",
+    "empty": "Henüz aile profili eklemedin.",
+    "name": "İsim",
+    "relation": "Yakınlık",
+    "relation_placeholder": "Eş, anne, çocuk…",
+    "color": "Renk",
+    "confirm_delete": "Bu profili silmek istediğine emin misin?",
+    "edit": "Profili düzenle",
+    "saving": "Kaydediliyor…"
+  },
+  "prescriptions": {
+    "title": "Reçetelerim",
+    "add": "Reçete Ekle",
+    "empty": "Henüz reçete kaydın yok.",
+    "doctor_name": "Doktor adı",
+    "date": "Tarih",
+    "notes": "Notlar",
+    "profile": "Kişi",
+    "medicines_in_prescription": "Reçetedeki ilaçlar",
+    "add_medicine_row": "İlaç ekle",
+    "remove_medicine_row": "Kaldır",
+    "medicine_count": "{{count}} ilaç",
+    "confirm_delete": "Bu reçeteyi silmek istediğine emin misin?",
+    "no_profile": "Genel"
+  },
   "about": {
     "title": "Hakkında",
     "description": "MedManager, evindeki ilaçları takip etmeni sağlayan kişisel bir uygulamadır. Açık kaynaklıdır.",
