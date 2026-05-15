@@ -76,7 +76,18 @@
     "days_remaining": "gün kaldı",
     "days_unit": "gün",
     "unopened_state": "Açılmamış",
+    "profile": "Aile profili",
     "confirm_delete": "Bu ilacı silmek istediğine emin misin?",
+    "archive": "Arşivle",
+    "unarchive": "Geri Al",
+    "archived_badge": "Arşivlendi",
+    "confirm_archive": "Bu ilacı arşivlemek istediğine emin misin? Ana listeden gizlenecek.",
+    "usage_log": "Kullanım takibi",
+    "usage_taken": "Aldım",
+    "usage_skipped": "Atladım",
+    "equivalent_found": "Muadil: {{names}}",
+    "interaction_warning": "İlaç etkileşim uyarısı",
+    "interaction_dismiss": "Kapat",
     "filter": {
       "all": "Tümü",
       "critical": "Kritik",
@@ -84,7 +95,8 @@
       "expiring": "Yaklaşan",
       "expired": "Süresi doldu",
       "opened": "Açılmış",
-      "unopened": "Açılmamış"
+      "unopened": "Açılmamış",
+      "archived": "Arşiv"
     }
   },
   "check": {
@@ -147,6 +159,16 @@
     "medicine_count": "{{count}} ilaç",
     "confirm_delete": "Bu reçeteyi silmek istediğine emin misin?",
     "no_profile": "Genel"
+  },
+  "doctor_visit": {
+    "title": "Doktor Görüşmesi",
+    "subtitle": "İlaç envanterim",
+    "print": "Yazdır",
+    "no_medicines": "Aktif ilacın bulunmuyor.",
+    "general": "Genel",
+    "disclaimer": "Bu liste bilgi amaçlıdır. Tıbbi tavsiye değildir.",
+    "expired_section": "Süresi Dolmuş",
+    "interactions_found": "{{count}} etkileşim tespit edildi"
   },
   "about": {
     "title": "Hakkında",

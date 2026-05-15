@@ -77,7 +77,18 @@
     "days_remaining": "days left",
     "days_unit": "days",
     "unopened_state": "Unopened",
+    "profile": "Family profile",
     "confirm_delete": "Are you sure you want to delete this medicine?",
+    "archive": "Archive",
+    "unarchive": "Restore",
+    "archived_badge": "Archived",
+    "confirm_archive": "Archive this medicine? It will be hidden from your main list.",
+    "usage_log": "Usage log",
+    "usage_taken": "Taken",
+    "usage_skipped": "Skipped",
+    "equivalent_found": "Equivalent: {{names}}",
+    "interaction_warning": "Drug interaction warning",
+    "interaction_dismiss": "Dismiss",
     "filter": {
       "all": "All",
       "critical": "Critical",
@@ -85,7 +96,8 @@
       "expiring": "Expiring",
       "expired": "Expired",
       "opened": "Opened",
-      "unopened": "Unopened"
+      "unopened": "Unopened",
+      "archived": "Archived"
     }
   },
   "check": {
@@ -148,6 +160,16 @@
     "medicine_count": "{{count}} medicine",
     "confirm_delete": "Are you sure you want to delete this prescription?",
     "no_profile": "General"
+  },
+  "doctor_visit": {
+    "title": "Doctor Visit",
+    "subtitle": "My medicine inventory",
+    "print": "Print",
+    "no_medicines": "No active medicines.",
+    "general": "General",
+    "disclaimer": "This list is for informational purposes only. Not medical advice.",
+    "expired_section": "Expired",
+    "interactions_found": "{{count}} interaction(s) detected"
   },
   "about": {
     "title": "About",

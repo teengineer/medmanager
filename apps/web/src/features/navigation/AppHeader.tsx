@@ -35,6 +35,9 @@ export function AppHeader() {
           <NavLink to="/prescriptions" active={pathname.startsWith("/prescriptions")} icon={<RxIcon />}>
             {t("prescriptions.title")}
           </NavLink>
+          <NavLink to="/doctor-visit" active={pathname.startsWith("/doctor-visit")} icon={<StethoscopeIcon />}>
+            {t("doctor_visit.title")}
+          </NavLink>
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
@@ -62,6 +65,9 @@ export function AppHeader() {
         </NavLink>
         <NavLink to="/prescriptions" active={pathname.startsWith("/prescriptions")} icon={<RxIcon />}>
           {t("prescriptions.title")}
+        </NavLink>
+        <NavLink to="/doctor-visit" active={pathname.startsWith("/doctor-visit")} icon={<StethoscopeIcon />}>
+          {t("doctor_visit.title")}
         </NavLink>
       </nav>
 
@@ -307,6 +313,16 @@ function RxIcon() {
       <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" strokeLinecap="round" />
       <rect x="9" y="3" width="6" height="4" rx="1" />
       <path d="M9 12h6M9 16h4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function StethoscopeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M4.8 2.3A.3.3 0 104.5 2H4a2 2 0 00-2 2v5a6 6 0 006 6v0a6 6 0 006-6V4a2 2 0 00-2-2h-.3a.3.3 0 10-.3.3" strokeLinecap="round"/>
+      <path d="M8 15v1a6 6 0 006 6v0a6 6 0 006-6v-4" strokeLinecap="round"/>
+      <circle cx="20" cy="10" r="2"/>
     </svg>
   );
 }

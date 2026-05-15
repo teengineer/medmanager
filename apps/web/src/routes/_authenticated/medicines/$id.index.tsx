@@ -1,7 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
-import { useDeleteMedicine, useMedicine, useOpenMedicine } from "../../../features/medicines/hooks";
+import {
+  useDeleteMedicine,
+  useMedicine,
+  useOpenMedicine,
+  useArchiveMedicine,
+  useUsageLogs,
+  useLogUsage,
+} from "../../../features/medicines/hooks";
 import type { Medicine } from "../../../features/medicines/hooks";
+import { useProfiles } from "../../../features/profiles/hooks";
 
 export const Route = createFileRoute("/_authenticated/medicines/$id/")({
   component: MedicineDetailPage,
@@ -12,8 +20,12 @@ function MedicineDetailPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const medicine = useMedicine(id);
+  const profiles = useProfiles();
   const open = useOpenMedicine();
   const del = useDeleteMedicine();
+  const archive = useArchiveMedicine();
+  const usageLogs = useUsageLogs(id);
+  const logUsage = useLogUsage(id);
 
   if (medicine.isLoading) {
     return <p className="p-6 text-slate-500">{t("common.loading")}</p>;
@@ -23,12 +35,32 @@ function MedicineDetailPage() {
   }
   const m = medicine.data;
   const status = statusOf(m);
+  const profile = m.profileId ? profiles.data?.find((p) => p.id === m.profileId) : null;
   const dateFmt = new Intl.DateTimeFormat(i18n.language, {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
   const fmt = (isoDate: string) => dateFmt.format(new Date(isoDate));
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  // Build 14-day array from 13 days ago to today
+  const days = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (13 - i));
+    return d.toISOString().slice(0, 10);
+  });
+
+  const logsByDate = new Map<string, boolean>();
+  for (const log of usageLogs.data ?? []) {
+    logsByDate.set(log.date, log.taken);
+  }
+
+  function colorForDay(day: string) {
+    if (!logsByDate.has(day)) return "bg-slate-200";
+    return logsByDate.get(day) ? "bg-green-400" : "bg-red-400";
+  }
 
   return (
     <main className="mx-auto max-w-2xl p-4 pb-28">
@@ -44,7 +76,14 @@ function MedicineDetailPage() {
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">{m.name}</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-3xl font-bold text-slate-900">{m.name}</h1>
+              {m.archivedAt && (
+                <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800">
+                  {t("medicine.archived_badge")}
+                </span>
+              )}
+            </div>
             <div className="mt-1 flex flex-wrap items-center gap-x-2 text-sm text-slate-500">
               {m.strength && <span>{m.strength}</span>}
               {m.strength && m.form && <span>·</span>}
@@ -56,6 +95,26 @@ function MedicineDetailPage() {
                 </>
               )}
             </div>
+            {profile && (
+              <div className="mt-2">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+                  style={{
+                    backgroundColor: profile.color ? `${profile.color}22` : "#f1f5f9",
+                    color: profile.color ?? "#64748b",
+                  }}
+                >
+                  <span
+                    className="size-2 rounded-full"
+                    style={{ backgroundColor: profile.color ?? "#94a3b8" }}
+                  />
+                  {profile.name}
+                  {profile.relation && (
+                    <span className="opacity-70">· {profile.relation}</span>
+                  )}
+                </span>
+              </div>
+            )}
           </div>
           <StatusBadge status={status} medicine={m} />
         </div>
@@ -126,9 +185,43 @@ function MedicineDetailPage() {
         </section>
       )}
 
+      {/* Usage log section */}
+      <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-5">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {t("medicine.usage_log")}
+        </h2>
+        <div className="flex gap-1.5 mb-4">
+          {days.map((day) => (
+            <span
+              key={day}
+              className={`size-5 rounded-full ${colorForDay(day)}`}
+              title={day}
+            />
+          ))}
+        </div>
+        {!m.archivedAt && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => logUsage.mutate({ date: today, taken: true })}
+              disabled={logUsage.isPending}
+              className="btn-primary text-sm flex-1"
+            >
+              {t("medicine.usage_taken")}
+            </button>
+            <button
+              onClick={() => logUsage.mutate({ date: today, taken: false })}
+              disabled={logUsage.isPending}
+              className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 flex-1"
+            >
+              {t("medicine.usage_skipped")}
+            </button>
+          </div>
+        )}
+      </section>
+
       {/* Actions */}
       <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-        {!m.isOpened && (
+        {!m.isOpened && !m.archivedAt && (
           <button
             onClick={() => open.mutate({ id: m.id })}
             disabled={open.isPending}
@@ -144,6 +237,16 @@ function MedicineDetailPage() {
         >
           {t("common.edit")}
         </Link>
+        <button
+          onClick={() => {
+            if (!confirm(t("medicine.confirm_archive"))) return;
+            archive.mutate({ id: m.id, archive: !m.archivedAt });
+          }}
+          disabled={archive.isPending}
+          className="rounded-xl border border-amber-200 bg-white px-4 py-3 font-medium text-amber-700 hover:bg-amber-50 disabled:opacity-60 sm:w-auto"
+        >
+          {m.archivedAt ? t("medicine.unarchive") : t("medicine.archive")}
+        </button>
         <button
           onClick={async () => {
             if (!confirm(t("medicine.confirm_delete"))) return;

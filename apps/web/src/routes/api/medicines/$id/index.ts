@@ -15,7 +15,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
 
         const userId = session.user.id;
         const locale = await resolveLocale(userId, request.headers.get("accept-language"));
-        const [entry] = await loadWithTags(userId, params.id);
+        const [entry] = await loadWithTags(userId, { medicineId: params.id });
         if (!entry) return new Response(null, { status: 404 });
         return Response.json(toMedicineDto(entry.medicine, entry.tags, locale));
       },
@@ -40,6 +40,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
         const patch: Partial<typeof medicines.$inferInsert> = {
           updatedAt: new Date().toISOString(),
         };
+        if (body.profileId !== undefined) patch.profileId = body.profileId ?? null;
         if (body.name !== undefined) patch.name = body.name.trim();
         if (body.activeIngredient !== undefined)
           patch.activeIngredient = body.activeIngredient?.trim() || null;
@@ -55,6 +56,9 @@ export const Route = createFileRoute("/api/medicines/$id/")({
         if (body.unit !== undefined) patch.unit = body.unit.trim();
         if (body.notes !== undefined) patch.notes = body.notes?.trim() || null;
         if (body.image !== undefined) patch.image = body.image ?? null;
+        if (body.archive !== undefined) {
+          patch.archivedAt = body.archive ? new Date().toISOString() : null;
+        }
 
         await db.update(medicines).set(patch).where(eq(medicines.id, id));
 
@@ -68,7 +72,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
           }
         }
 
-        const [entry] = await loadWithTags(userId, id);
+        const [entry] = await loadWithTags(userId, { medicineId: id });
         if (!entry) return new Response(null, { status: 404 });
         return Response.json(toMedicineDto(entry.medicine, entry.tags, locale));
       },

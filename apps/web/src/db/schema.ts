@@ -104,6 +104,7 @@ export const medicines = sqliteTable(
     unit: text("unit").notNull().default("unit"),
     notes: text("notes"),
     image: text("image"),
+    archivedAt: text("archived_at"),
     createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
     updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
   },
@@ -165,6 +166,25 @@ export const prescriptions = sqliteTable(
     profileIdx: index("prescriptions_profile").on(t.profileId),
   }),
 );
+
+export const usageLogs = sqliteTable(
+  "usage_logs",
+  {
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    medicineId: text("medicine_id").notNull().references(() => medicines.id, { onDelete: "cascade" }),
+    date: text("date").notNull(), // YYYY-MM-DD
+    taken: integer("taken", { mode: "boolean" }).notNull(),
+    notes: text("notes"),
+    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+  },
+  (t) => ({
+    userIdx: index("usage_logs_user").on(t.userId),
+    medicineIdx: index("usage_logs_medicine").on(t.medicineId),
+    uniqueEntry: uniqueIndex("usage_logs_medicine_date").on(t.medicineId, t.date),
+  }),
+);
+export type UsageLog = typeof usageLogs.$inferSelect;
 
 export const pushSubscriptions = sqliteTable(
   "push_subscriptions",

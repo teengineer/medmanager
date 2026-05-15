@@ -26,6 +26,7 @@ export interface Medicine {
   unit: string;
   notes?: string | null;
   image?: string | null;
+  archivedAt?: string | null;
   useCases: UseCaseTag[];
 }
 
@@ -61,13 +62,14 @@ export interface MedicineInput {
 const MEDICINES_KEY = ["medicines"] as const;
 const USE_CASES_KEY = ["use-cases"] as const;
 
-export function useMedicines(params: { q?: string; useCase?: string; expired?: boolean; opened?: boolean; profileId?: string } = {}) {
+export function useMedicines(params: { q?: string; useCase?: string; expired?: boolean; opened?: boolean; profileId?: string; archived?: boolean } = {}) {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
   if (params.useCase) search.set("useCase", params.useCase);
   if (params.expired !== undefined) search.set("expired", String(params.expired));
   if (params.opened !== undefined) search.set("opened", String(params.opened));
   if (params.profileId) search.set("profileId", params.profileId);
+  if (params.archived) search.set("archived", "true");
   const suffix = search.toString() ? `?${search}` : "";
   return useQuery<MedicineListResponse>({
     queryKey: [...MEDICINES_KEY, params],
@@ -139,5 +141,46 @@ export function useOpenMedicine() {
         body: JSON.stringify({ openedShelfLifeDays }),
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: MEDICINES_KEY }),
+  });
+}
+
+export function useArchiveMedicine() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, archive }: { id: string; archive: boolean }) =>
+      api<Medicine>(`/medicines/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ archive }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: MEDICINES_KEY }),
+  });
+}
+
+export interface UsageLog {
+  id: string;
+  medicineId: string;
+  date: string;
+  taken: boolean;
+  notes: string | null;
+  createdAt: string;
+}
+
+export function useUsageLogs(medicineId: string, days = 14) {
+  return useQuery<UsageLog[]>({
+    queryKey: ["usage-logs", medicineId, days],
+    queryFn: () => api<UsageLog[]>(`/medicines/${medicineId}/usage-logs?days=${days}`),
+    enabled: Boolean(medicineId),
+  });
+}
+
+export function useLogUsage(medicineId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { date: string; taken: boolean; notes?: string }) =>
+      api<UsageLog>(`/medicines/${medicineId}/log-usage`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usage-logs", medicineId] }),
   });
 }

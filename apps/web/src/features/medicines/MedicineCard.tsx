@@ -20,22 +20,22 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
     status === "expired"
       ? "bg-slate-300"
       : status === "expiring"
-        ? "bg-amber-400"
-        : "bg-brand";
+        ? "bg-red-400"
+        : "bg-yellow-400";
 
   const badgeCls =
     status === "expired"
       ? "bg-slate-100 text-slate-600 border-slate-200"
       : status === "expiring"
-        ? "bg-amber-50 text-amber-800 border-amber-200"
-        : "bg-brand-light text-brand-dark border-brand/20";
+        ? "bg-red-50 text-red-700 border-red-200"
+        : "bg-yellow-50 text-yellow-700 border-yellow-200";
 
   const dotCls =
     status === "expired"
       ? "bg-slate-400"
       : status === "expiring"
-        ? "bg-amber-500"
-        : "bg-brand";
+        ? "bg-red-500"
+        : "bg-yellow-500";
 
   return (
     <Link

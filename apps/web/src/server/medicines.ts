@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull } from "drizzle-orm";
+import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines, useCases } from "~/db/schema";
@@ -25,6 +25,7 @@ export const createSchema = z.object({
 
 export const updateSchema = createSchema.partial().extend({
   clearOpenedAt: z.boolean().optional(),
+  archive: z.boolean().optional(),
 });
 
 export const openSchema = z.object({
@@ -35,6 +36,7 @@ export const listQuerySchema = z.object({
   q: z.string().optional(),
   useCase: z.string().optional(),
   profileId: z.string().optional(),
+  archived: z.literal("true").optional(),
   expired: z
     .union([z.literal("true"), z.literal("false")])
     .transform((v) => v === "true")
@@ -45,16 +47,26 @@ export const listQuerySchema = z.object({
     .optional(),
 });
 
-export async function loadWithTags(userId: string, medicineId?: string, profileId?: string) {
+export async function loadWithTags(
+  userId: string,
+  opts: {
+    medicineId?: string;
+    profileId?: string;
+    includeArchived?: boolean;
+  } = {},
+) {
+  const { medicineId, profileId, includeArchived } = opts;
   let whereClause;
   if (medicineId) {
     whereClause = and(eq(medicines.userId, userId), eq(medicines.id, medicineId));
   } else if (profileId === "none") {
-    whereClause = and(eq(medicines.userId, userId), isNull(medicines.profileId));
+    whereClause = and(eq(medicines.userId, userId), isNull(medicines.profileId), isNull(medicines.archivedAt));
   } else if (profileId) {
-    whereClause = and(eq(medicines.userId, userId), eq(medicines.profileId, profileId));
+    whereClause = and(eq(medicines.userId, userId), eq(medicines.profileId, profileId), isNull(medicines.archivedAt));
+  } else if (includeArchived === true) {
+    whereClause = and(eq(medicines.userId, userId), isNotNull(medicines.archivedAt));
   } else {
-    whereClause = eq(medicines.userId, userId);
+    whereClause = and(eq(medicines.userId, userId), isNull(medicines.archivedAt));
   }
   const rows = await db.select().from(medicines).where(whereClause).orderBy(asc(medicines.expiryDate));
   if (rows.length === 0) return [];
