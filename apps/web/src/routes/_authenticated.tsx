@@ -1,8 +1,49 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useMe } from "~/features/auth/hooks";
+import { ExpiredMedicinesModal } from "~/features/medicines/ExpiredMedicinesModal";
+import { useMedicines } from "~/features/medicines/hooks";
 import { AppHeader } from "~/features/navigation/AppHeader";
+
+const SEEN_EXPIRED_KEY = "mm_seen_expired_ids";
+
+function useExpiredMedicinesAlert() {
+  const { data, isLoading } = useMedicines({ expired: true });
+  const [dismissed, setDismissed] = useState(false);
+
+  const seenIds = useMemo<Set<string>>(() => {
+    try {
+      const raw = localStorage.getItem(SEEN_EXPIRED_KEY);
+      return new Set(raw ? (JSON.parse(raw) as string[]) : []);
+    } catch {
+      return new Set();
+    }
+  }, []);
+
+  const unseen = useMemo(
+    () => (data?.items ?? []).filter((m) => !seenIds.has(m.id)),
+    [data, seenIds],
+  );
+
+  const dismiss = useCallback(() => {
+    try {
+      localStorage.setItem(
+        SEEN_EXPIRED_KEY,
+        JSON.stringify([...seenIds, ...unseen.map((m) => m.id)]),
+      );
+    } catch {
+      // ignore storage errors
+    }
+    setDismissed(true);
+  }, [seenIds, unseen]);
+
+  return {
+    medicines: unseen,
+    show: !dismissed && !isLoading && unseen.length > 0,
+    dismiss,
+  };
+}
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: ({ context }) => {
@@ -16,6 +57,7 @@ export const Route = createFileRoute("/_authenticated")({
 function AuthenticatedLayout() {
   const { t, i18n } = useTranslation();
   const me = useMe();
+  const expiredAlert = useExpiredMedicinesAlert();
 
   useEffect(() => {
     const userLocale = me.data?.locale;
@@ -39,6 +81,12 @@ function AuthenticatedLayout() {
     <div className="min-h-dvh">
       <AppHeader />
       <Outlet />
+      {expiredAlert.show && (
+        <ExpiredMedicinesModal
+          medicines={expiredAlert.medicines}
+          onDismiss={expiredAlert.dismiss}
+        />
+      )}
     </div>
   );
 }

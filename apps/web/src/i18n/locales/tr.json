@@ -90,6 +90,11 @@
     "equivalent_found": "Muadil: {{names}}",
     "interaction_warning": "İlaç etkileşim uyarısı",
     "interaction_dismiss": "Kapat",
+    "expired_alert": {
+      "title": "Süresi Dolmuş İlaçlar",
+      "subtitle": "Aşağıdaki ilaçların son kullanma tarihi geçmiş. Lütfen kontrol et.",
+      "dismiss": "Tamam, Anladım"
+    },
     "filter": {
       "all": "Tümü",
       "critical": "Kritik",

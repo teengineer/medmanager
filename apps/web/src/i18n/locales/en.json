@@ -91,6 +91,11 @@
     "equivalent_found": "Equivalent: {{names}}",
     "interaction_warning": "Drug interaction warning",
     "interaction_dismiss": "Dismiss",
+    "expired_alert": {
+      "title": "Expired Medicines",
+      "subtitle": "The following medicines have passed their expiry date. Please check.",
+      "dismiss": "OK, Got it"
+    },
     "filter": {
       "all": "All",
       "critical": "Critical",
