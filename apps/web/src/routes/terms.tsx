@@ -15,14 +15,14 @@ function TermsPage() {
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        medmanager
+        bundanvar
       </Link>
       <h1 className="mt-4 text-3xl font-bold text-brand">{t("legal.terms")}</h1>
 
       {isTr ? (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            MedManager kişisel ilaç envanteri takibi amacıyla sunulan bir araçtır. Kullanmakla
+            Bundan Var kişisel ilaç envanteri takibi amacıyla sunulan bir araçtır. Kullanmakla
             aşağıdaki koşulları kabul etmiş olursunuz.
           </p>
           <h2 className="text-xl font-semibold">Tıbbi tavsiye değildir</h2>
@@ -40,7 +40,7 @@ function TermsPage() {
       ) : (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            MedManager is a personal medicine-inventory tool. By using it you accept the terms
+            Bundan Var is a personal medicine-inventory tool. By using it you accept the terms
             below.
           </p>
           <h2 className="text-xl font-semibold">Not medical advice</h2>

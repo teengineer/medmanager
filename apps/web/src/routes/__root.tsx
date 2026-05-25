@@ -31,7 +31,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: "theme-color", content: "#E30A17" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-      { title: "MedManager" },
+      { title: "Bundan Var" },
     ],
     links: [
       { rel: "icon", href: "/favicon.png", type: "image/png" },

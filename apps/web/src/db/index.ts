@@ -8,7 +8,7 @@ let _db: LibSQLDatabase<typeof schema> | null = null;
 function getDb(): LibSQLDatabase<typeof schema> {
   if (_db) return _db;
   _client = createClient({
-    url: process.env.DATABASE_URL ?? "file:./medmanager.db",
+    url: process.env.DATABASE_URL ?? "file:./bundanvar.db",
     authToken: process.env.DATABASE_AUTH_TOKEN,
   });
   _db = drizzle(_client, { schema });

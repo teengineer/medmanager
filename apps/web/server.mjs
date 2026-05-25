@@ -115,22 +115,22 @@ async function main() {
     const { migrate } = await import("drizzle-orm/libsql/migrator");
     const { createClient } = await import("@libsql/client");
 
-    const dbUrl = process.env.DATABASE_URL || "file:./medmanager.db";
+    const dbUrl = process.env.DATABASE_URL || "file:./bundanvar.db";
     const client = createClient({
       url: dbUrl,
       authToken: process.env.DATABASE_AUTH_TOKEN,
     });
     const db = drizzle(client);
     await migrate(db, { migrationsFolder: join(__dirname, "drizzle") });
-    console.log("[medmanager] migrations applied");
+    console.log("[bundanvar] migrations applied");
 
     const { seedUseCases } = await import("./dist/server/seed.js").catch(() => ({ seedUseCases: null }));
     if (seedUseCases) {
       await seedUseCases();
-      console.log("[medmanager] seed complete");
+      console.log("[bundanvar] seed complete");
     }
   } catch (err) {
-    console.error("[medmanager] migration/seed error (non-fatal):", err.message);
+    console.error("[bundanvar] migration/seed error (non-fatal):", err.message);
   }
 
   // TanStack Start SSR handler
@@ -138,7 +138,7 @@ async function main() {
   const handler = serverEntry.default?.fetch ?? serverEntry.default;
 
   if (typeof handler !== "function") {
-    console.error("[medmanager] could not find fetch handler in dist/server/server.js");
+    console.error("[bundanvar] could not find fetch handler in dist/server/server.js");
     process.exit(1);
   }
 
@@ -152,7 +152,7 @@ async function main() {
       const webResponse = await handler(webRequest);
       await sendWebResponse(res, webResponse);
     } catch (err) {
-      console.error("[medmanager] request error:", err);
+      console.error("[bundanvar] request error:", err);
       if (!res.headersSent) {
         res.writeHead(500, { "Content-Type": "text/plain" });
         res.end("Internal Server Error");
@@ -161,11 +161,11 @@ async function main() {
   });
 
   server.listen(PORT, () => {
-    console.log(`[medmanager] server running on http://localhost:${PORT}`);
+    console.log(`[bundanvar] server running on http://localhost:${PORT}`);
   });
 }
 
 main().catch((err) => {
-  console.error("[medmanager] fatal:", err);
+  console.error("[bundanvar] fatal:", err);
   process.exit(1);
 });

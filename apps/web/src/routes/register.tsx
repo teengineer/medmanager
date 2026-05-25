@@ -23,7 +23,7 @@ function RegisterPage() {
           <div className="mb-6 flex flex-col items-center text-center">
             <img src="/favicon.png" alt="" className="size-14" />
             <h1 className="mt-4 bg-gradient-to-r from-brand to-brand-dark bg-clip-text text-2xl font-bold text-transparent">
-              MedManager
+              Bundan Var
             </h1>
             <p className="mt-1 text-sm text-slate-500">{t("tagline")}</p>
           </div>

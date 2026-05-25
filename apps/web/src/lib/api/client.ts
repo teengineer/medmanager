@@ -42,7 +42,7 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (!headers.has("Accept-Language")) {
     const lang =
-      (typeof window !== "undefined" && window.localStorage.getItem("medmanager.lang")) ||
+      (typeof window !== "undefined" && window.localStorage.getItem("bundanvar.lang")) ||
       (typeof document !== "undefined" && document.documentElement.lang) ||
       "tr";
     headers.set("Accept-Language", lang);

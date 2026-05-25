@@ -1,0 +1,52 @@
+# Bundan Var — Docker Compose for Dokploy (or any Docker host).
+#
+# On Dokploy you can either:
+#   - create an "Application" pointed at this repo with Build Type = Dockerfile
+#     (simplest; the cron below can instead be a Dokploy Schedule), or
+#   - create a "Compose" service that uses this file.
+#
+# Env vars come from a sibling .env file (see .env.example). On Dokploy, set them
+# in the service's Environment tab instead.
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: bundanvar:latest
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+    expose:
+      - "3000"
+    # Publish a host port for local/standalone runs. Remove (or leave to Dokploy's
+    # Traefik) when a reverse proxy fronts the app by domain.
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Daily expiry notifier — 09:00 UTC (12:00 Istanbul). Calls the CRON_SECRET-guarded
+  # endpoint inside the compose network. On a Dokploy "Application" deploy, replace
+  # this with a Dokploy Schedule that POSTs to https://<domain>/api/cron/expiry.
+  cron:
+    image: alpine:3.20
+    restart: unless-stopped
+    depends_on:
+      - app
+    env_file:
+      - .env
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache curl tzdata >/dev/null
+        printf '0 9 * * * curl -fsS -X POST -H "x-cron-secret: %s" http://app:3000/api/cron/expiry >/proc/1/fd/1 2>&1\n' "$$CRON_SECRET" > /etc/crontabs/root
+        crond -f -l 8

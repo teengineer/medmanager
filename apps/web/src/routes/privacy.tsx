@@ -15,14 +15,14 @@ function PrivacyPage() {
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        MedManager
+        Bundan Var
       </Link>
       <h1 className="mt-4 text-3xl font-bold text-brand">{t("legal.privacy")}</h1>
 
       {isTr ? (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            MedManager ("biz") olarak gizliliğinize önem veriyoruz. Bu sayfa hangi verileri
+            Bundan Var ("biz") olarak gizliliğinize önem veriyoruz. Bu sayfa hangi verileri
             topladığımızı, nasıl kullandığımızı ve haklarınızı özetler.
           </p>
           <h2 className="text-xl font-semibold">Topladığımız veriler</h2>
@@ -40,7 +40,7 @@ function PrivacyPage() {
           <ul className="list-disc pl-5">
             <li>Verilerinizi her zaman dışa aktarabilirsiniz (Ayarlar → Verilerimi indir).</li>
             <li>Hesabınızı ve tüm verilerinizi kalıcı olarak silebilirsiniz (Ayarlar → Hesabımı sil).</li>
-            <li>Soru veya talepleriniz için: iletisim@medmanager.local.</li>
+            <li>Soru veya talepleriniz için: iletisim@bundanvar.local.</li>
           </ul>
           <h2 className="text-xl font-semibold">Saklama</h2>
           <p>Veriler siz silene kadar saklanır; hesap silindiğinde tüm ilişkili veriler de silinir.</p>
@@ -48,7 +48,7 @@ function PrivacyPage() {
       ) : (
         <div className="prose mt-6 space-y-4 text-slate-700">
           <p>
-            MedManager ("we") respects your privacy. This page summarises what we collect, how we
+            Bundan Var ("we") respects your privacy. This page summarises what we collect, how we
             use it, and your rights.
           </p>
           <h2 className="text-xl font-semibold">What we collect</h2>
@@ -66,7 +66,7 @@ function PrivacyPage() {
           <ul className="list-disc pl-5">
             <li>Export your data any time (Settings → Export my data).</li>
             <li>Delete your account and all data permanently (Settings → Delete my account).</li>
-            <li>Questions: contact@medmanager.local.</li>
+            <li>Questions: contact@bundanvar.local.</li>
           </ul>
           <h2 className="text-xl font-semibold">Retention</h2>
           <p>Data is kept until you delete it; deleting your account removes all related data.</p>

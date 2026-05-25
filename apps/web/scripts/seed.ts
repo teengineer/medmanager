@@ -6,5 +6,5 @@ loadEnv({ path: ".env" });
 const { seedUseCases } = await import("../src/db/seed");
 
 await seedUseCases();
-console.log("[medmanager] seed complete");
+console.log("[bundanvar] seed complete");
 process.exit(0);

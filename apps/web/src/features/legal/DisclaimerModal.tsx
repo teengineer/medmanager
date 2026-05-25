@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-const KEY = "medmanager.disclaimer.v1";
+const KEY = "bundanvar.disclaimer.v1";
 
 export function DisclaimerModal() {
   const { t } = useTranslation();

@@ -297,7 +297,7 @@ function FullscreenCard({ medicine, onClose }: { medicine: Medicine; onClose: ()
       </button>
       <div className="flex max-w-3xl flex-col items-center gap-4 text-center">
         <span className="rounded-full bg-brand-light px-4 py-1 text-sm font-semibold uppercase tracking-wider text-brand-dark">
-          MedManager
+          Bundan Var
         </span>
         <p className="bg-gradient-to-br from-brand to-brand-dark bg-clip-text text-6xl font-bold text-transparent sm:text-7xl">
           {medicine.name}

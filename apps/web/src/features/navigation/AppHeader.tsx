@@ -18,7 +18,7 @@ export function AppHeader() {
         <Link to="/" className="flex items-center gap-2">
           <LogoMark />
           <span className="bg-gradient-to-r from-brand to-brand-dark bg-clip-text text-lg font-bold tracking-tight text-transparent">
-            MedManager
+            Bundan Var
           </span>
         </Link>
 

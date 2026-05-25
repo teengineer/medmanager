@@ -18,13 +18,13 @@ function AboutPage() {
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        medmanager
+        bundanvar
       </Link>
 
       <div className="mt-6 flex items-center gap-3">
         <img src="/favicon.png" alt="" className="size-12" />
         <div>
-          <h1 className="text-3xl font-bold text-brand">MedManager</h1>
+          <h1 className="text-3xl font-bold text-brand">Bundan Var</h1>
           <p className="text-sm text-slate-500">{t("tagline")}</p>
         </div>
       </div>

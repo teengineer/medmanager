@@ -13,7 +13,7 @@ export const user = sqliteTable(
     image: text("image"),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
-    // medmanager-specific custom fields
+    // bundanvar-specific custom fields
     firstName: text("first_name"),
     lastName: text("last_name"),
     locale: text("locale").notNull().default("tr"),

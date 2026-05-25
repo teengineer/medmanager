@@ -20,7 +20,7 @@ if (!i18n.isInitialized) {
     detection: {
       order: ["localStorage"],
       caches: ["localStorage"],
-      lookupLocalStorage: "medmanager.lang",
+      lookupLocalStorage: "bundanvar.lang",
     },
   });
 }

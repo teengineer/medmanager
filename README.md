@@ -1,15 +1,21 @@
-# MedManager
+# Bundan Var
 
-Installable PWA for household medicine inventory. Track expiry dates, get reminders before things go bad, and at the doctor's office pull up what you already have so they don't re-prescribe.
+Installable PWA for household medicine inventory. Track expiry dates, get reminders
+before things go bad, and at the doctor's office pull up what you already have so
+they don't re-prescribe.
 
 Turkish and English UI. Turkey-first market.
 
 ## Stack
 
-- **Web** (`apps/web`): React + Vite + TanStack Router + TanStack Query + Tailwind + `vite-plugin-pwa` + `react-i18next`
-- **API** (`apps/api`): Hono + Drizzle ORM + SQLite (via libsql, Turso-compatible) + bcryptjs + jose (JWT) + web-push
-- **Auth**: email/password + Google OAuth (implicit flow, no server secret)
-- **Deploy**: Netlify for web, self-hosted Docker for API (or Railway/Fly.io)
+Single full-stack app — SSR pages and the API run in one Node process.
+
+- **App** (`apps/web`): [TanStack Start](https://tanstack.com/start) (React 19 + TanStack Router + TanStack Query) + Tailwind v4 + `react-i18next`
+- **Backend**: server functions + API routes under `src/routes/api/`, [Drizzle ORM](https://orm.drizzle.team) + libsql (SQLite local / Turso remote)
+- **Auth**: [Better Auth](https://better-auth.com) — email/password + Google OAuth
+- **Web Push**: `web-push` (VAPID)
+- **Runtime**: Node 22, single process via `apps/web/server.mjs`
+- **Deploy**: Docker → [Dokploy](https://dokploy.com) (see [`DEPLOY.md`](./DEPLOY.md))
 
 ## Prerequisites
 
@@ -21,47 +27,46 @@ Turkish and English UI. Turkey-first market.
 
 ```bash
 pnpm install
-pnpm api:migrate              # creates medmanager.db, seeds 50 use-cases
-
-# Two terminals
-pnpm dev                      # web → http://localhost:5173
-pnpm api:dev                  # api → http://localhost:5080
+pnpm db:migrate              # creates apps/web/bundanvar.db, applies schema, seeds 50 use-cases
+pnpm dev                     # http://localhost:5173 — SSR + API combined
 ```
 
-Copy `apps/api/.env.example` → `apps/api/.env` for production-like config.
+Copy `apps/web/.env.example` → `apps/web/.env.local` and fill in values for
+production-like config (Turso, Better Auth secret, Google OAuth, web push).
 
 ## Scripts
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Run web dev server |
-| `pnpm api:dev` | Run API with watch mode |
-| `pnpm test` | Run API test suite (vitest) |
-| `pnpm typecheck` | Typecheck all packages |
-| `pnpm build` | Build everything |
-| `pnpm api:generate` | Regenerate drizzle migration after schema changes |
-| `pnpm api:migrate` | Apply migrations + seed |
+| `pnpm dev` | Run the dev server (SSR + API) |
+| `pnpm build` | Build to `apps/web/dist/{client,server}` |
+| `pnpm start` | Run the production server (`server.mjs`) after build |
+| `pnpm typecheck` | Typecheck |
+| `pnpm lint` | Lint |
+| `pnpm test` | Run the test suite (vitest) |
+| `pnpm db:generate` | Regenerate the Drizzle migration after schema changes |
+| `pnpm db:migrate` | Apply migrations + seed |
+| `pnpm db:studio` | Open Drizzle Studio |
 
 ## Repo layout
 
 ```
 apps/
-  web/                 Vite + React PWA
-  api/                 Hono + Drizzle TypeScript API
-  api-dotnet-archive/  Previous .NET 10 + FastEndpoints version (reference only)
-packages/
-  shared-types/        Reserved for future shared types
-deploy/                Dockerfile, compose, Caddy, Litestream config
-.github/workflows/     CI — install, test, build, push Docker image to GHCR
+  web/                 TanStack Start app (SSR + API in one process)
+    src/routes/        file-based routes; API under src/routes/api/
+    src/db/            Drizzle schema + libsql client + seed
+    drizzle/           committed migration SQL
+    server.mjs         production entry (static + SSR/API fetch handler)
+Dockerfile             build + run image (Node 22, pnpm)
+docker-compose.yml     app + daily expiry-cron sidecar
+DEPLOY.md              Dokploy deployment guide
+.github/workflows/     CI — typecheck, lint, test, build, docker build
 ```
 
 ## Deployment
 
-See [`deploy/README.md`](./deploy/README.md) for three topologies:
-
-- **A** — Web on Netlify + API self-hosted Docker on a Linux VPS (recommended, cheapest, most control)
-- **B** — API on Railway or Fly.io, web on Netlify (no-ops)
-- **C** — Everything on Netlify with Turso (serverless, needs small app tweaks)
+Docker, deployed to Dokploy with a remote Turso database. Full instructions in
+[`DEPLOY.md`](./DEPLOY.md).
 
 ## License
 

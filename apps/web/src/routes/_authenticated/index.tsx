@@ -28,7 +28,7 @@ function HomePage() {
         <div className="pointer-events-none absolute -bottom-16 -left-16 size-56 rounded-full bg-accent/10 blur-3xl" />
         <div className="relative">
           <p className="text-sm font-medium uppercase tracking-wider text-brand-dark/70">
-            MedManager
+            Bundan Var
           </p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             {t("hello")}

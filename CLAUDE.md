@@ -7,7 +7,7 @@ Bu dosya Claude Code için projeye özel rehber.
 Installable **PWA** for household medicine inventory. Users log medicines (name, expiry, when opened, which conditions they treat) so at the doctor they can say "I already have this" and avoid a redundant prescription. Purpose: reduce medicine waste and public-health spending.
 
 **Market**: Turkey first. UI is TR (default) + EN from day one.
-**Branding**: App name is **MedManager** (capitalized M, M). Repo/package names stay lowercase.
+**Branding**: App name is **Bundan Var** (two words, capitalized). Repo/package slug is `bundanvar` (lowercase).
 
 ## Stack (locked in — do not swap without asking)
 
@@ -19,7 +19,7 @@ Installable **PWA** for household medicine inventory. Users log medicines (name,
 | Auth | **Better Auth** (`better-auth`) with Drizzle adapter. Email/password + Google OAuth. Sessions via cookies. |
 | Web Push | `web-push` npm, VAPID config in env |
 | Build / runtime | Vite 7, Node 22, single Node process (`server.mjs`) |
-| Deploy | Netlify (SSR + API in same function); cron via Netlify Scheduled Function |
+| Deploy | Docker → Dokploy (single container, SSR + API); cron via Dokploy Schedule or compose sidecar |
 | Package manager | pnpm 10 workspace |
 
 **Why these:**
@@ -80,7 +80,7 @@ pnpm-workspace.yaml             apps/* only
 
 ```bash
 pnpm install
-pnpm db:migrate                 # creates medmanager.db, applies schema, seeds use-cases
+pnpm db:migrate                 # creates bundanvar.db, applies schema, seeds use-cases
 pnpm dev                        # http://localhost:5173 — SSR + API combined
 pnpm typecheck
 pnpm lint
@@ -124,17 +124,19 @@ pnpm db:studio                  # drizzle studio
 
 ## Deployment
 
-- **Netlify only** (web + API in same SSR function).
-- Required env vars (Netlify dashboard):
+- **Docker → Dokploy** (single container runs SSR + API). See `DEPLOY.md`, `Dockerfile`, `docker-compose.yml`.
+- Container start runs `pnpm db:migrate` (Drizzle migrate + seed, both idempotent) then `node server.mjs`.
+- DB is remote libsql (Turso) — container is stateless, no volume.
+- Required env vars (Dokploy service env):
   - `DATABASE_URL` — Turso libsql URL (e.g. `libsql://...turso.io`)
   - `DATABASE_AUTH_TOKEN` — Turso token
   - `BETTER_AUTH_SECRET` — long random (Better Auth signs sessions with this)
-  - `BETTER_AUTH_URL` — production origin (e.g. `https://e-medmanager.netlify.app`)
+  - `BETTER_AUTH_URL` — production origin (e.g. `https://bundanvar.ilg.az`)
   - `WEB_ORIGIN` — same as above (added to `trustedOrigins`)
   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — for Google sign-in
   - `PUSH_PUBLIC_KEY`, `PUSH_PRIVATE_KEY`, `PUSH_SUBJECT` — VAPID for web push
   - `CRON_SECRET` — guards `/api/cron/expiry` from public calls
-- Migrations run on Node startup via `server.mjs` if `DATABASE_URL` set.
+- Expiry cron: Dokploy Schedule (or compose `cron` sidecar) POSTs to `/api/cron/expiry` daily.
 
 ## Ground rules for Claude
 

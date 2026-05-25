@@ -48,7 +48,7 @@ export const Route = createFileRoute("/api/me/export")({
           medicines: mine.map((m) => toMedicineDto(m, tagsByMedicine.get(m.id) ?? [], locale)),
         };
 
-        const filename = `medmanager-export-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}.json`;
+        const filename = `bundanvar-export-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}.json`;
         return new Response(JSON.stringify(payload, null, 2), {
           status: 200,
           headers: {

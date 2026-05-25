@@ -7,7 +7,7 @@ import { effectiveExpiryOf } from "~/lib/medicines";
 const NOTIFY_DAYS = [30, 7, 1, 0];
 
 function configureWebPush() {
-  const subject = process.env.PUSH_SUBJECT ?? "mailto:admin@medmanager.local";
+  const subject = process.env.PUSH_SUBJECT ?? "mailto:admin@bundanvar.local";
   const publicKey = process.env.PUSH_PUBLIC_KEY ?? "";
   const privateKey = process.env.PUSH_PRIVATE_KEY ?? "";
   if (!publicKey || !privateKey) return false;

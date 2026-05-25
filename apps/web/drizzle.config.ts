@@ -1,6 +1,6 @@
 import { defineConfig } from "drizzle-kit";
 
-const url = process.env.DATABASE_URL ?? "file:./medmanager.db";
+const url = process.env.DATABASE_URL ?? "file:./bundanvar.db";
 const isRemote = url.startsWith("libsql:") || url.startsWith("http");
 
 export default defineConfig({
