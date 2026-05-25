@@ -4,7 +4,7 @@ import { z } from "zod";
 import { db } from "~/db";
 import { useCases } from "~/db/schema";
 import { auth } from "~/lib/auth";
-import { resolveLocale } from "~/lib/locale";
+import { localeFromUser } from "~/lib/locale";
 import { slugify } from "~/lib/slug";
 import { jsonError } from "~/server/medicines";
 
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/api/use-cases/")({
       GET: async ({ request }: { request: Request }) => {
         const session = await auth.api.getSession({ headers: request.headers });
         const userId = session?.user.id ?? null;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session?.user, request.headers.get("accept-language"));
 
         const rows = userId
           ? await db

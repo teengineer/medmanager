@@ -3,8 +3,9 @@ import { and, eq } from "drizzle-orm";
 import { db } from "~/db";
 import { medicineUseCases, medicines } from "~/db/schema";
 import { auth } from "~/lib/auth";
-import { resolveLocale } from "~/lib/locale";
-import { jsonError, loadWithTags, toMedicineDto, updateSchema } from "~/server/medicines";
+import { localeFromUser } from "~/lib/locale";
+import type { Medicine } from "~/db/schema";
+import { jsonError, loadTagsForIds, loadWithTags, toMedicineDto, updateSchema } from "~/server/medicines";
 
 export const Route = createFileRoute("/api/medicines/$id/")({
   server: {
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
         if (!session) return new Response("Unauthorized", { status: 401 });
 
         const userId = session.user.id;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session.user, request.headers.get("accept-language"));
         const [entry] = await loadWithTags(userId, { medicineId: params.id });
         if (!entry) return new Response(null, { status: 404 });
         return Response.json(toMedicineDto(entry.medicine, entry.tags, locale));
@@ -28,7 +29,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
         const body = parsed.data;
         const userId = session.user.id;
         const id = params.id;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session.user, request.headers.get("accept-language"));
 
         const [existing] = await db
           .select()
@@ -73,9 +74,9 @@ export const Route = createFileRoute("/api/medicines/$id/")({
           }
         }
 
-        const [entry] = await loadWithTags(userId, { medicineId: id });
-        if (!entry) return new Response(null, { status: 404 });
-        return Response.json(toMedicineDto(entry.medicine, entry.tags, locale));
+        const updatedMed = { ...existing, ...patch } as Medicine;
+        const tagMap = await loadTagsForIds([id]);
+        return Response.json(toMedicineDto(updatedMed, tagMap.get(id) ?? [], locale));
       },
       DELETE: async ({ request, params }: { request: Request; params: { id: string } }) => {
         const session = await auth.api.getSession({ headers: request.headers });

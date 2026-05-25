@@ -3,8 +3,9 @@ import { and, eq } from "drizzle-orm";
 import { db } from "~/db";
 import { medicines } from "~/db/schema";
 import { auth } from "~/lib/auth";
-import { resolveLocale } from "~/lib/locale";
-import { jsonError, loadWithTags, openSchema, toMedicineDto } from "~/server/medicines";
+import { localeFromUser } from "~/lib/locale";
+import type { Medicine } from "~/db/schema";
+import { jsonError, loadTagsForIds, openSchema, toMedicineDto } from "~/server/medicines";
 
 export const Route = createFileRoute("/api/medicines/$id/open")({
   server: {
@@ -18,7 +19,7 @@ export const Route = createFileRoute("/api/medicines/$id/open")({
         const body = parsed.data;
         const userId = session.user.id;
         const id = params.id;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session.user, request.headers.get("accept-language"));
 
         const [existing] = await db
           .select()
@@ -35,9 +36,9 @@ export const Route = createFileRoute("/api/medicines/$id/open")({
           patch.openedShelfLifeDays = body.openedShelfLifeDays;
 
         await db.update(medicines).set(patch).where(eq(medicines.id, id));
-        const [entry] = await loadWithTags(userId, { medicineId: id });
-        if (!entry) return new Response(null, { status: 404 });
-        return Response.json(toMedicineDto(entry.medicine, entry.tags, locale));
+        const updatedMed = { ...existing, ...patch } as Medicine;
+        const tagMap = await loadTagsForIds([id]);
+        return Response.json(toMedicineDto(updatedMed, tagMap.get(id) ?? [], locale));
       },
     },
   },

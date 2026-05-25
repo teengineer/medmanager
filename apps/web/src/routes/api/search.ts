@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, eq, gt, isNotNull, like, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, isNotNull, like, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines, useCases } from "~/db/schema";
 import { auth } from "~/lib/auth";
-import { resolveLocale } from "~/lib/locale";
+import { localeFromUser } from "~/lib/locale";
 import { toMedicineDto } from "~/lib/medicines";
 import { jsonError } from "~/server/medicines";
 
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/api/search")({
         if (!parsed.success) return jsonError(parsed.error);
 
         const userId = session.user.id;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session.user, request.headers.get("accept-language"));
         const { useCase, activeIngredient } = parsed.data;
 
         const rows = activeIngredient
@@ -71,11 +71,11 @@ export const Route = createFileRoute("/api/search")({
             nameEn: useCases.nameEn,
           })
           .from(medicineUseCases)
-          .innerJoin(useCases, eq(useCases.id, medicineUseCases.useCaseId));
+          .innerJoin(useCases, eq(useCases.id, medicineUseCases.useCaseId))
+          .where(inArray(medicineUseCases.medicineId, medicineIds));
 
         const byMedicine = new Map<string, typeof tagRows>();
         for (const tag of tagRows) {
-          if (!medicineIds.includes(tag.medicineId)) continue;
           const existing = byMedicine.get(tag.medicineId);
           if (existing) existing.push(tag);
           else byMedicine.set(tag.medicineId, [tag]);

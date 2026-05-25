@@ -3,11 +3,12 @@ import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines } from "~/db/schema";
 import { auth } from "~/lib/auth";
-import { resolveLocale } from "~/lib/locale";
+import { localeFromUser } from "~/lib/locale";
 import {
   createSchema,
   jsonError,
   listQuerySchema,
+  loadTagsForIds,
   loadWithTags,
   toMedicineDto,
 } from "~/server/medicines";
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/api/medicines/")({
         if (!parsed.success) return jsonError(parsed.error);
 
         const userId = session.user.id;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session.user, request.headers.get("accept-language"));
         let data = await loadWithTags(userId, {
           profileId: parsed.data.profileId,
           includeArchived: parsed.data.archived === "true",
@@ -61,7 +62,7 @@ export const Route = createFileRoute("/api/medicines/")({
         if (!parsed.success) return jsonError(parsed.error);
         const body = parsed.data;
         const userId = session.user.id;
-        const locale = await resolveLocale(userId, request.headers.get("accept-language"));
+        const locale = localeFromUser(session.user, request.headers.get("accept-language"));
 
         const [row] = await db
           .insert(medicines)
@@ -85,16 +86,17 @@ export const Route = createFileRoute("/api/medicines/")({
           .returning();
         if (!row) return new Response(null, { status: 500 });
 
+        let tags: import("~/server/medicines").TagRow[] = [];
         if (body.useCaseIds && body.useCaseIds.length > 0) {
           const unique = Array.from(new Set(body.useCaseIds));
           await db
             .insert(medicineUseCases)
             .values(unique.map((useCaseId) => ({ medicineId: row.id, useCaseId })));
+          const tagMap = await loadTagsForIds([row.id]);
+          tags = tagMap.get(row.id) ?? [];
         }
 
-        const [entry] = await loadWithTags(userId, { medicineId: row.id });
-        if (!entry) return new Response(null, { status: 500 });
-        return Response.json(toMedicineDto(entry.medicine, entry.tags, locale), { status: 201 });
+        return Response.json(toMedicineDto(row, tags, locale), { status: 201 });
       },
     },
   },

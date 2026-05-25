@@ -1,4 +1,4 @@
-import { and, asc, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines, useCases } from "~/db/schema";
@@ -48,6 +48,37 @@ export const listQuerySchema = z.object({
     .optional(),
 });
 
+export type TagRow = {
+  medicineId: string;
+  useCaseId: string;
+  slug: string;
+  nameTr: string;
+  nameEn: string;
+};
+
+export async function loadTagsForIds(medicineIds: string[]): Promise<Map<string, TagRow[]>> {
+  if (medicineIds.length === 0) return new Map();
+  const tagRows = await db
+    .select({
+      medicineId: medicineUseCases.medicineId,
+      useCaseId: useCases.id,
+      slug: useCases.slug,
+      nameTr: useCases.nameTr,
+      nameEn: useCases.nameEn,
+    })
+    .from(medicineUseCases)
+    .innerJoin(useCases, eq(useCases.id, medicineUseCases.useCaseId))
+    .where(inArray(medicineUseCases.medicineId, medicineIds));
+
+  const map = new Map<string, TagRow[]>();
+  for (const tag of tagRows) {
+    const list = map.get(tag.medicineId);
+    if (list) list.push(tag);
+    else map.set(tag.medicineId, [tag]);
+  }
+  return map;
+}
+
 export async function loadWithTags(
   userId: string,
   opts: {
@@ -72,25 +103,8 @@ export async function loadWithTags(
   const rows = await db.select().from(medicines).where(whereClause).orderBy(asc(medicines.expiryDate));
   if (rows.length === 0) return [];
 
-  const tagRows = await db
-    .select({
-      medicineId: medicineUseCases.medicineId,
-      useCaseId: useCases.id,
-      slug: useCases.slug,
-      nameTr: useCases.nameTr,
-      nameEn: useCases.nameEn,
-    })
-    .from(medicineUseCases)
-    .innerJoin(useCases, eq(useCases.id, medicineUseCases.useCaseId));
-
-  const byMedicine = new Map<string, typeof tagRows>();
-  for (const tag of tagRows) {
-    const existing = byMedicine.get(tag.medicineId);
-    if (existing) existing.push(tag);
-    else byMedicine.set(tag.medicineId, [tag]);
-  }
-
-  return rows.map((m) => ({ medicine: m, tags: byMedicine.get(m.id) ?? [] }));
+  const tagMap = await loadTagsForIds(rows.map((r) => r.id));
+  return rows.map((m) => ({ medicine: m, tags: tagMap.get(m.id) ?? [] }));
 }
 
 export function jsonError(zodError: z.ZodError, status = 400) {
