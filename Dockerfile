@@ -18,16 +18,15 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/package.json
 RUN pnpm install --frozen-lockfile
 
+ENV NODE_ENV=production
+ENV PORT=3000
+
 # 2) Copy the source and build the web app -> apps/web/dist/{client,server}
 COPY . .
 RUN pnpm --filter web build
-
-ENV NODE_ENV=production
-ENV PORT=3000
 EXPOSE 3000
 
 WORKDIR /app/apps/web
 
-# Apply DB migrations + seed the use-case catalog (idempotent), then start the
-# combined SSR/API server. db:migrate runs against DATABASE_URL (Turso).
-CMD ["sh", "-c", "pnpm db:migrate && pnpm start"]
+# server.mjs runs migrations + seed on startup (non-fatal), then starts the SSR/API server.
+CMD ["pnpm", "start"]
