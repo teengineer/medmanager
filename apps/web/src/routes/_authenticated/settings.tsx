@@ -44,12 +44,12 @@ function SettingsPage() {
     <main className="mx-auto max-w-xl p-4 pb-24 sm:p-6">
       <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {t("profile.data_and_privacy")}
         </h1>
       </div>
 
-      <section className="surface-card flex flex-col divide-y divide-slate-100 p-2">
+      <section className="surface-card flex flex-col divide-y divide-line p-2">
         <SettingRow
           onClick={handleExport}
           icon={<DownloadIcon />}
@@ -61,9 +61,9 @@ function SettingsPage() {
 
       <button
         onClick={handleDeleteAccount}
-        className="mt-6 flex w-full items-center gap-3 rounded-2xl border border-red-200 bg-red-50/50 p-4 text-left text-red-700 transition hover:bg-red-50"
+        className="mt-6 flex w-full items-center gap-3 rounded-2xl border border-brand-100 bg-brand-50/50 p-4 text-left text-brand-dark transition hover:bg-brand-50"
       >
-        <span className="flex size-10 items-center justify-center rounded-xl bg-red-100 text-red-600">
+        <span className="flex size-10 items-center justify-center rounded-xl bg-brand-100 text-brand-dark">
           <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="1.8">
             <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14" strokeLinecap="round" />
           </svg>
@@ -86,12 +86,12 @@ function SettingRow({
   return (
     <button
       onClick={onClick}
-      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-slate-50"
+      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-canvas-soft"
     >
       <span className="flex size-10 items-center justify-center rounded-xl bg-brand-light text-brand">
         {icon}
       </span>
-      <span className="flex-1 font-medium text-slate-800">{title}</span>
+      <span className="flex-1 font-medium text-ink">{title}</span>
       <ChevronIcon />
     </button>
   );
@@ -101,12 +101,12 @@ function SettingLink({ to, icon, title }: { to: string; icon: React.ReactNode; t
   return (
     <RLink
       to={to}
-      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-slate-50"
+      className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-canvas-soft"
     >
-      <span className="flex size-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+      <span className="flex size-10 items-center justify-center rounded-xl bg-canvas-soft text-ink-soft">
         {icon}
       </span>
-      <span className="flex-1 font-medium text-slate-800">{title}</span>
+      <span className="flex-1 font-medium text-ink">{title}</span>
       <ChevronIcon />
     </RLink>
   );
@@ -114,7 +114,7 @@ function SettingLink({ to, icon, title }: { to: string; icon: React.ReactNode; t
 
 function ChevronIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg viewBox="0 0 24 24" className="size-4 text-mute" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );

@@ -1,10 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
-import { auth, type Session } from "./auth";
+import type { Session } from "./auth";
 
 export const getSession = createServerFn({ method: "GET" }).handler(
   async (): Promise<Session | null> => {
     try {
+      // Dynamic import keeps the server-only auth/db/pg graph out of the client bundle.
+      const { auth } = await import("./auth");
       const headers = getRequestHeaders();
       const session = await auth.api.getSession({ headers });
       return session;
@@ -13,14 +15,3 @@ export const getSession = createServerFn({ method: "GET" }).handler(
     }
   },
 );
-
-export async function requireSession(request: Request): Promise<Session> {
-  const session = await auth.api.getSession({ headers: request.headers });
-  if (!session) {
-    throw new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-  return session;
-}

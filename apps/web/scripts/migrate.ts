@@ -3,7 +3,7 @@ import { config as loadEnv } from "dotenv";
 loadEnv({ path: ".env.local" });
 loadEnv({ path: ".env" });
 
-const { migrate } = await import("drizzle-orm/libsql/migrator");
+const { migrate } = await import("drizzle-orm/node-postgres/migrator");
 const { db } = await import("../src/db/index");
 const { seedUseCases } = await import("../src/db/seed");
 

@@ -93,11 +93,11 @@ function MedicinesPage() {
     <main className="mx-auto max-w-3xl p-4 pb-24 sm:p-6">
       <header className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
             {t("medicine.my_medicines")}
           </h1>
           {medicines.data && (
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-sm text-mute">
               {t("medicine.count", { count: medicines.data.items.length })}
             </p>
           )}
@@ -110,7 +110,7 @@ function MedicinesPage() {
       <div className="relative mb-3">
         <svg
           viewBox="0 0 24 24"
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-mute"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
@@ -128,7 +128,7 @@ function MedicinesPage() {
           <button
             type="button"
             onClick={() => setQ("")}
-            className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            className="absolute right-2 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-full text-mute hover:bg-canvas hover:text-ink-soft"
             aria-label="Clear"
           >
             <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -144,8 +144,8 @@ function MedicinesPage() {
             onClick={() => setActiveProfileId(undefined)}
             className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
               activeProfileId === undefined
-                ? "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
-                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                ? "border-brand bg-gradient-to-br from-brand-400 to-brand-dark text-white shadow-brand"
+                : "border-line bg-white text-ink-soft hover:border-line-strong hover:text-ink"
             }`}
           >
             {t("medicine.filter.all")}
@@ -158,8 +158,8 @@ function MedicinesPage() {
                 activeProfileId === p.id
                   ? p.color
                     ? "border-transparent text-white shadow-brand"
-                    : "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
-                  : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                    : "border-brand bg-gradient-to-br from-brand-400 to-brand-dark text-white shadow-brand"
+                  : "border-line bg-white text-ink-soft hover:border-line-strong hover:text-ink"
               }`}
               style={activeProfileId === p.id && p.color ? { backgroundColor: p.color, borderColor: p.color } : undefined}
             >
@@ -183,8 +183,8 @@ function MedicinesPage() {
             onClick={() => setFilter(f)}
             className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
               filter === f
-                ? "border-brand bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
-                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-slate-900"
+                ? "border-brand bg-gradient-to-br from-brand-400 to-brand-dark text-white shadow-brand"
+                : "border-line bg-white text-ink-soft hover:border-line-strong hover:text-ink"
             }`}
           >
             {t(`medicine.filter.${f}`)}
@@ -232,18 +232,18 @@ function MedicinesPage() {
       {medicines.isLoading ? (
         <div className="grid gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+            <div key={i} className="surface-card h-24 animate-pulse" />
           ))}
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 p-10 text-center animate-fade-in">
+        <div className="rounded-card border-2 border-dashed border-line-strong bg-white/60 p-10 text-center animate-fade-in">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-light text-brand">
             <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth="1.6">
               <rect x="3" y="7" width="18" height="13" rx="3" />
               <path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2" strokeLinecap="round" />
             </svg>
           </span>
-          <p className="mt-3 font-medium text-slate-700">
+          <p className="mt-3 font-medium text-ink-soft">
             {isArchived ? t("medicine.filter.archived") + " — " + t("medicine.empty") : t("medicine.empty")}
           </p>
           {!isArchived && (

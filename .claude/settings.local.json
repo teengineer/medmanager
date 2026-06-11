@@ -39,7 +39,21 @@
       "Bash(pnpm --filter web lint)",
       "Bash(git diff *)",
       "Bash(pnpm build *)",
-      "Bash(Remove-Item D:\\\\Repositories\\\\medmanager\\\\apps\\\\web\\\\Dockerfile *)"
+      "Bash(Remove-Item D:\\\\Repositories\\\\medmanager\\\\apps\\\\web\\\\Dockerfile *)",
+      "Bash(curl -s -X POST http://localhost:5173/api/auth/sign-in/social -H \"Content-Type: application/json\" -H \"Origin: http://localhost:5173\" -d '{\"provider\":\"google\",\"callbackURL\":\"/\"}')",
+      "Bash(python -c \"import sys,json,urllib.parse; u=json.load\\(sys.stdin\\)['url']; q=urllib.parse.parse_qs\\(urllib.parse.urlparse\\(u\\).query\\); print\\('redirect_uri =', q['redirect_uri'][0]\\)\")",
+      "PowerShell(Get-NetTCPConnection *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(pnpm add *)",
+      "Bash(python -)",
+      "PowerShell(try { Get-NetTCPConnection -LocalPort 5173,5174,5175 -State Listen -ErrorAction Stop | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -Confirm:$false } } catch {}; \"ports clear\")",
+      "Bash(curl -s -o /dev/null -w \"medicines/new -> %{http_code}\" http://localhost:5173/medicines/new)",
+      "WebSearch",
+      "WebFetch(domain:recetem.enabiz.gov.tr)",
+      "WebFetch(domain:rehber.enabiz.gov.tr)",
+      "WebFetch(domain:www.its.gov.tr)",
+      "Bash(node -e ' *)",
+      "PowerShell(try { Get-NetTCPConnection -LocalPort 5173,5174,5175 -State Listen -ErrorAction Stop | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -Confirm:$false } } catch {}; \"ok\")"
     ]
   }
 }

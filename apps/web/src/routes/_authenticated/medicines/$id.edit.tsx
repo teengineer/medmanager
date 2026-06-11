@@ -15,14 +15,14 @@ function EditMedicinePage() {
   const medicine = useMedicine(id);
   const update = useUpdateMedicine(id);
 
-  if (medicine.isLoading) return <p className="p-6 text-slate-500">{t("common.loading")}</p>;
-  if (!medicine.data) return <p className="p-6 text-slate-500">{t("medicine.not_found")}</p>;
+  if (medicine.isLoading) return <p className="p-6 text-mute">{t("common.loading")}</p>;
+  if (!medicine.data) return <p className="p-6 text-mute">{t("medicine.not_found")}</p>;
 
   return (
     <main className="mx-auto max-w-xl p-4 pb-24">
       <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold text-brand">{t("medicine.edit")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">{t("medicine.edit")}</h1>
       </div>
       <MedicineForm
         initial={medicine.data}

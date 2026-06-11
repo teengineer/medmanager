@@ -1,18 +1,19 @@
-import { sql } from "drizzle-orm";
-import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { boolean, index, integer, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+
+const isoNow = () => new Date().toISOString();
 
 // ─── Better Auth tables ─────────────────────────────────────────────────────
 
-export const user = sqliteTable(
+export const user = pgTable(
   "user",
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     email: text("email").notNull(),
-    emailVerified: integer("email_verified", { mode: "boolean" }).notNull().default(false),
+    emailVerified: boolean("email_verified").notNull().default(false),
     image: text("image"),
-    createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).notNull(),
     // bundanvar-specific custom fields
     firstName: text("first_name"),
     lastName: text("last_name"),
@@ -24,12 +25,12 @@ export const user = sqliteTable(
   }),
 );
 
-export const session = sqliteTable("session", {
+export const session = pgTable("session", {
   id: text("id").primaryKey(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
   token: text("token").notNull().unique(),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   userId: text("user_id")
@@ -37,7 +38,7 @@ export const session = sqliteTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
 });
 
-export const account = sqliteTable("account", {
+export const account = pgTable("account", {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
@@ -47,26 +48,26 @@ export const account = sqliteTable("account", {
   accessToken: text("access_token"),
   refreshToken: text("refresh_token"),
   idToken: text("id_token"),
-  accessTokenExpiresAt: integer("access_token_expires_at", { mode: "timestamp" }),
-  refreshTokenExpiresAt: integer("refresh_token_expires_at", { mode: "timestamp" }),
+  accessTokenExpiresAt: timestamp("access_token_expires_at", { mode: "date" }),
+  refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { mode: "date" }),
   scope: text("scope"),
   password: text("password"),
-  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).notNull(),
 });
 
-export const verification = sqliteTable("verification", {
+export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
-  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }),
-  updatedAt: integer("updated_at", { mode: "timestamp" }),
+  expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }),
+  updatedAt: timestamp("updated_at", { mode: "date" }),
 });
 
 // ─── Domain tables ──────────────────────────────────────────────────────────
 
-export const profiles = sqliteTable(
+export const profiles = pgTable(
   "profiles",
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -76,15 +77,15 @@ export const profiles = sqliteTable(
     name: text("name").notNull(),
     relation: text("relation"),
     color: text("color"),
-    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
   },
   (t) => ({
     userIdx: index("profiles_user").on(t.userId),
   }),
 );
 
-export const medicines = sqliteTable(
+export const medicines = pgTable(
   "medicines",
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -106,8 +107,8 @@ export const medicines = sqliteTable(
     notes: text("notes"),
     image: text("image"),
     archivedAt: text("archived_at"),
-    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
   },
   (t) => ({
     userIdx: index("medicines_user").on(t.userId),
@@ -116,7 +117,7 @@ export const medicines = sqliteTable(
   }),
 );
 
-export const useCases = sqliteTable(
+export const useCases = pgTable(
   "use_cases",
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -132,7 +133,7 @@ export const useCases = sqliteTable(
   }),
 );
 
-export const medicineUseCases = sqliteTable(
+export const medicineUseCases = pgTable(
   "medicine_use_cases",
   {
     medicineId: text("medicine_id")
@@ -147,7 +148,7 @@ export const medicineUseCases = sqliteTable(
   }),
 );
 
-export const prescriptions = sqliteTable(
+export const prescriptions = pgTable(
   "prescriptions",
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -159,8 +160,8 @@ export const prescriptions = sqliteTable(
     prescriptionDate: text("prescription_date").notNull(),
     notes: text("notes"),
     medicinesJson: text("medicines_json"),
-    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text("updated_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
   },
   (t) => ({
     userIdx: index("prescriptions_user").on(t.userId),
@@ -168,16 +169,16 @@ export const prescriptions = sqliteTable(
   }),
 );
 
-export const usageLogs = sqliteTable(
+export const usageLogs = pgTable(
   "usage_logs",
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
     userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
     medicineId: text("medicine_id").notNull().references(() => medicines.id, { onDelete: "cascade" }),
     date: text("date").notNull(), // YYYY-MM-DD
-    taken: integer("taken", { mode: "boolean" }).notNull(),
+    taken: boolean("taken").notNull(),
     notes: text("notes"),
-    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
   },
   (t) => ({
     userIdx: index("usage_logs_user").on(t.userId),
@@ -187,7 +188,7 @@ export const usageLogs = sqliteTable(
 );
 export type UsageLog = typeof usageLogs.$inferSelect;
 
-export const pushSubscriptions = sqliteTable(
+export const pushSubscriptions = pgTable(
   "push_subscriptions",
   {
     id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -197,7 +198,7 @@ export const pushSubscriptions = sqliteTable(
     endpoint: text("endpoint").notNull(),
     p256dh: text("p256dh").notNull(),
     auth: text("auth").notNull(),
-    createdAt: text("created_at").notNull().default(sql`CURRENT_TIMESTAMP`),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
   },
   (t) => ({
     endpointIdx: uniqueIndex("push_subscriptions_endpoint_unique").on(t.endpoint),

@@ -14,7 +14,8 @@
     "delete": "Sil",
     "cancel": "İptal",
     "back": "Geri",
-    "remove": "Kaldır"
+    "remove": "Kaldır",
+    "required": "Bu alan zorunlu."
   },
   "auth": {
     "sign_in": "Giriş Yap",
@@ -104,7 +105,15 @@
       "opened": "Açılmış",
       "unopened": "Açılmamış",
       "archived": "Arşiv"
-    }
+    },
+    "barcode": "Barkod / Karekod (GTIN)",
+    "scan_button": "Okut",
+    "scan_title": "Karekodu Okut",
+    "scan_hint": "İlaç kutusundaki karekodu çerçeveye hizalayın — barkod ve son kullanma tarihi otomatik dolar.",
+    "scan_camera_error": "Kameraya erişilemedi. Tarayıcı izinlerini kontrol edin.",
+    "scan_generic_error": "Tarama başlatılamadı. Bu özellik HTTPS veya localhost gerektirir.",
+    "scan_filled": "Karekod okundu — son kullanma tarihi {{date}} olarak dolduruldu.",
+    "scan_filled_barcode": "Barkod okundu ve dolduruldu."
   },
   "check": {
     "title": "Doktorda kontrol",

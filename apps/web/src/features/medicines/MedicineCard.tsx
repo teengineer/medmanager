@@ -18,38 +18,38 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
 
   const accentBar =
     status === "expired"
-      ? "bg-slate-300"
+      ? "bg-brand-300"
       : status === "expiring"
-        ? "bg-red-400"
-        : "bg-yellow-400";
+        ? "bg-amber-300"
+        : "bg-emerald-300";
 
   const badgeCls =
     status === "expired"
-      ? "bg-slate-100 text-slate-600 border-slate-200"
+      ? "bg-brand-50 text-brand-dark"
       : status === "expiring"
-        ? "bg-red-50 text-red-700 border-red-200"
-        : "bg-yellow-50 text-yellow-700 border-yellow-200";
+        ? "bg-amber-50 text-amber-700"
+        : "bg-emerald-50 text-emerald-700";
 
   const dotCls =
     status === "expired"
-      ? "bg-slate-400"
+      ? "bg-brand-400"
       : status === "expiring"
-        ? "bg-red-500"
-        : "bg-yellow-500";
+        ? "bg-amber-400"
+        : "bg-emerald-400";
 
   return (
     <Link
       to="/medicines/$id"
       params={{ id: medicine.id }}
-      className="group relative flex gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-soft transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-pop"
+      className="surface-card group relative flex gap-3 overflow-hidden p-4 transition hover:-translate-y-0.5 hover:shadow-pop"
     >
-      <span className={`absolute inset-y-0 left-0 w-1 ${accentBar}`} aria-hidden />
+      <span className={`absolute inset-y-3 left-0 w-1 rounded-r-full ${accentBar}`} aria-hidden />
 
       {medicine.image && (
         <img
           src={medicine.image}
           alt={medicine.name}
-          className="h-20 w-20 shrink-0 rounded-lg object-contain"
+          className="h-20 w-20 shrink-0 rounded-2xl bg-canvas-soft object-contain"
         />
       )}
 
@@ -65,7 +65,7 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
                   aria-label={profile.name}
                 />
               )}
-              <h3 className={`truncate text-lg font-semibold ${status === "expired" ? "text-slate-500" : "text-slate-900"}`}>
+              <h3 className={`truncate text-lg font-semibold ${status === "expired" ? "text-mute" : "text-ink"}`}>
                 {medicine.name}
               </h3>
             </div>
@@ -73,7 +73,7 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
               <p className="text-sm text-slate-500">{medicine.strength}</p>
             )}
           </div>
-          <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium ${badgeCls}`}>
+          <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${badgeCls}`}>
             <span className={`size-1.5 rounded-full ${dotCls}`} />
             {status === "expired"
               ? t("medicine.expired")
@@ -96,10 +96,7 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
         {medicine.useCases.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {medicine.useCases.slice(0, 4).map((uc) => (
-              <span
-                key={uc.id}
-                className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700"
-              >
+              <span key={uc.id} className="chip-soft">
                 {uc.name}
               </span>
             ))}

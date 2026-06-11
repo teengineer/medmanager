@@ -111,17 +111,14 @@ async function sendWebResponse(res, webResponse) {
 async function main() {
   // Drizzle migration + seed on startup
   try {
-    const { drizzle } = await import("drizzle-orm/libsql");
-    const { migrate } = await import("drizzle-orm/libsql/migrator");
-    const { createClient } = await import("@libsql/client");
+    const { drizzle } = await import("drizzle-orm/node-postgres");
+    const { migrate } = await import("drizzle-orm/node-postgres/migrator");
+    const { default: pg } = await import("pg");
 
-    const dbUrl = process.env.DATABASE_URL || "file:./bundanvar.db";
-    const client = createClient({
-      url: dbUrl,
-      authToken: process.env.DATABASE_AUTH_TOKEN,
-    });
-    const db = drizzle(client);
+    const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL, max: 1 });
+    const db = drizzle(pool);
     await migrate(db, { migrationsFolder: join(__dirname, "drizzle") });
+    await pool.end();
     console.log("[bundanvar] migrations applied");
 
     const { seedUseCases } = await import("./dist/server/seed.js").catch(() => ({ seedUseCases: null }));

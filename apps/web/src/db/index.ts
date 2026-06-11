@@ -1,24 +1,24 @@
-import { createClient, type Client } from "@libsql/client";
-import { drizzle, type LibSQLDatabase } from "drizzle-orm/libsql";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import * as schema from "./schema";
 
-let _client: Client | null = null;
-let _db: LibSQLDatabase<typeof schema> | null = null;
+let _pool: pg.Pool | null = null;
+let _db: NodePgDatabase<typeof schema> | null = null;
 
-function getDb(): LibSQLDatabase<typeof schema> {
+function getDb(): NodePgDatabase<typeof schema> {
   if (_db) return _db;
-  _client = createClient({
-    url: process.env.DATABASE_URL ?? "file:./bundanvar.db",
-    authToken: process.env.DATABASE_AUTH_TOKEN,
+  _pool = new pg.Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 10,
   });
-  _db = drizzle(_client, { schema });
+  _db = drizzle(_pool, { schema });
   return _db;
 }
 
-export const db = new Proxy({} as LibSQLDatabase<typeof schema>, {
+export const db = new Proxy({} as NodePgDatabase<typeof schema>, {
   get(_target, prop, receiver) {
     return Reflect.get(getDb(), prop, receiver);
   },
 });
 
-export type Db = LibSQLDatabase<typeof schema>;
+export type Db = NodePgDatabase<typeof schema>;

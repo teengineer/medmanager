@@ -14,7 +14,8 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "back": "Back",
-    "remove": "Remove"
+    "remove": "Remove",
+    "required": "This field is required."
   },
   "auth": {
     "sign_in": "Sign in",
@@ -105,7 +106,15 @@
       "opened": "Opened",
       "unopened": "Unopened",
       "archived": "Archived"
-    }
+    },
+    "barcode": "Barcode / DataMatrix (GTIN)",
+    "scan_button": "Scan",
+    "scan_title": "Scan the code",
+    "scan_hint": "Align the DataMatrix code on the medicine box within the frame — barcode and expiry date will be filled automatically.",
+    "scan_camera_error": "Could not access the camera. Check browser permissions.",
+    "scan_generic_error": "Could not start scanning. This feature requires HTTPS or localhost.",
+    "scan_filled": "Code scanned — expiry date filled as {{date}}.",
+    "scan_filled_barcode": "Barcode scanned and filled."
   },
   "check": {
     "title": "Check at the doctor",

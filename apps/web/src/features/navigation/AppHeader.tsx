@@ -11,13 +11,14 @@ export function AppHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const initial = displayInitial(me.data);
+  const image = me.data?.image ?? null;
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-white/75 backdrop-blur-md supports-[backdrop-filter]:bg-white/65">
-      <div className="mx-auto flex h-14 max-w-5xl items-center gap-3 px-4">
+    <header className="surface-glass sticky top-0 z-30 border-x-0 border-t-0">
+      <div className="mx-auto flex h-15 max-w-5xl items-center gap-3 px-4">
         <Link to="/" className="flex items-center gap-2">
           <LogoMark />
-          <span className="bg-gradient-to-r from-brand to-brand-dark bg-clip-text text-lg font-bold tracking-tight text-transparent">
+          <span className="bg-gradient-to-r from-brand-400 to-brand-dark bg-clip-text text-lg font-bold tracking-tight text-transparent">
             Bundan Var
           </span>
         </Link>
@@ -44,16 +45,20 @@ export function AppHeader() {
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-brand to-brand-dark text-sm font-semibold text-white shadow-brand transition hover:scale-105 hover:shadow-[0_10px_24px_rgba(227,10,23,0.28)]"
+            className="flex size-9 items-center justify-center rounded-full bg-gradient-to-br from-brand-400 to-brand-dark text-sm font-semibold text-white ring-2 ring-white/80 shadow-brand transition hover:scale-105 overflow-hidden"
             aria-label={t("profile.title")}
             aria-expanded={menuOpen}
           >
-            {initial}
+            {image ? (
+              <img src={image} alt="" className="size-full object-cover" referrerPolicy="no-referrer" />
+            ) : (
+              initial
+            )}
           </button>
         </div>
       </div>
 
-      <nav className="flex items-center gap-1 overflow-x-auto border-t border-slate-100 px-3 py-1.5 md:hidden">
+      <nav className="flex items-center gap-1 overflow-x-auto border-t border-line/70 px-3 py-1.5 md:hidden">
         <NavLink to="/medicines" active={pathname.startsWith("/medicines")} icon={<MedicinesIcon />}>
           {t("medicine.my_medicines")}
         </NavLink>
@@ -90,10 +95,10 @@ function NavLink({
   return (
     <Link
       to={to}
-      className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+      className={`flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
         active
-          ? "bg-brand-light text-brand-dark shadow-[inset_0_0_0_1px_rgba(227,10,23,0.15)]"
-          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+          ? "bg-brand-light text-brand-dark"
+          : "text-mute hover:bg-white hover:text-ink hover:shadow-soft"
       }`}
     >
       {icon}
@@ -130,16 +135,27 @@ function ProfileMenu({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="absolute inset-x-0 top-14 animate-pop">
-      <div className="mx-auto flex max-w-5xl justify-end px-4">
+    <div className="absolute inset-x-0 top-15 animate-pop">
+      <div className="mx-auto flex max-w-5xl justify-end px-4 pt-2">
         <div
           ref={ref}
-          className="w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-pop"
+          className="w-72 overflow-hidden rounded-3xl border border-line bg-white shadow-pop"
         >
           {me.data && (
-            <div className="border-b border-slate-100 bg-gradient-to-br from-brand-50 to-white p-4 text-sm">
-              <p className="font-semibold text-slate-900">{displayName(me.data)}</p>
-              <p className="mt-0.5 truncate text-xs text-slate-500">{me.data.email}</p>
+            <div className="border-b border-line/70 bg-gradient-to-br from-brand-50 via-white to-accent-light/40 p-4 text-sm">
+              <div className="mb-2.5 flex items-center gap-3">
+                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-brand-400 to-brand-dark text-sm font-semibold text-white ring-2 ring-white">
+                  {me.data.image ? (
+                    <img src={me.data.image} alt="" className="size-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    displayInitial(me.data)
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-ink">{displayName(me.data)}</p>
+                  <p className="truncate text-xs text-mute">{me.data.email}</p>
+                </div>
+              </div>
               {!me.data.hasPassword && (
                 <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[11px] font-medium text-brand-dark shadow-soft">
                   <svg viewBox="0 0 24 24" className="size-3" aria-hidden>
@@ -181,14 +197,14 @@ function ProfileMenu({ onClose }: { onClose: () => void }) {
                 toggleLang();
                 onClose();
               }}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-slate-700 transition hover:bg-slate-50"
+              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-ink-soft transition hover:bg-canvas-soft"
             >
               <GlobeIcon />
               <span className="flex-1">{t("profile.language")}</span>
-              <span className="text-xs font-medium text-slate-500">{t("toggle_language")}</span>
+              <span className="text-xs font-medium text-mute">{t("toggle_language")}</span>
             </button>
           </div>
-          <div className="border-t border-slate-100" />
+          <div className="border-t border-line/70" />
           <button
             type="button"
             onClick={() => {
@@ -222,7 +238,7 @@ function MenuItem({
     <Link
       to={to}
       onClick={onClick}
-      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-50"
+      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-ink-soft transition hover:bg-canvas-soft"
     >
       {icon}
       {children}
@@ -254,7 +270,7 @@ function CheckIcon() {
 
 function UserIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="size-4 text-mute" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21a8 8 0 0116 0" strokeLinecap="round" />
     </svg>
@@ -263,7 +279,7 @@ function UserIcon() {
 
 function ShieldIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="size-4 text-mute" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z" strokeLinejoin="round" />
     </svg>
   );
@@ -271,7 +287,7 @@ function ShieldIcon() {
 
 function InfoIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="size-4 text-mute" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9" />
       <path d="M12 8h.01M11 12h1v5h1" strokeLinecap="round" />
     </svg>
@@ -280,7 +296,7 @@ function InfoIcon() {
 
 function GlobeIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="size-4 text-slate-500" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg viewBox="0 0 24 24" className="size-4 text-mute" fill="none" stroke="currentColor" strokeWidth="1.8">
       <circle cx="12" cy="12" r="9" />
       <path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18" />
     </svg>

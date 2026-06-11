@@ -42,7 +42,7 @@ export function RegisterForm() {
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("profile.first_name")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("profile.first_name")}</span>
           <input
             type="text"
             autoComplete="given-name"
@@ -54,7 +54,7 @@ export function RegisterForm() {
           )}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("profile.last_name")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("profile.last_name")}</span>
           <input
             type="text"
             autoComplete="family-name"
@@ -68,7 +68,7 @@ export function RegisterForm() {
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-slate-700">{t("auth.email")}</span>
+        <span className="text-sm font-medium text-ink-soft">{t("auth.email")}</span>
         <input
           type="email"
           autoComplete="email"
@@ -84,7 +84,7 @@ export function RegisterForm() {
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-slate-700">{t("auth.password")}</span>
+        <span className="text-sm font-medium text-ink-soft">{t("auth.password")}</span>
         <input
           type="password"
           autoComplete="new-password"
@@ -98,7 +98,7 @@ export function RegisterForm() {
       </label>
 
       {form.formState.errors.root && (
-        <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
           {form.formState.errors.root.message}
         </p>
       )}

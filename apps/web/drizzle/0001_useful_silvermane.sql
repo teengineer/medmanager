@@ -1,1 +1,0 @@
-ALTER TABLE `medicines` ADD `image` text;

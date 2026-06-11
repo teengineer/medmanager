@@ -52,7 +52,7 @@ function PrescriptionsPage() {
     <main className="mx-auto max-w-2xl p-4 pb-24 sm:p-6">
       <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {t("prescriptions.title")}
         </h1>
       </div>
@@ -68,7 +68,7 @@ function PrescriptionsPage() {
       </div>
 
       {showAdd && (
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft animate-rise">
+        <div className="surface-card mb-4 p-4 animate-rise">
           <PrescriptionForm onSave={() => setShowAdd(false)} onCancel={() => setShowAdd(false)} />
         </div>
       )}
@@ -76,15 +76,15 @@ function PrescriptionsPage() {
       {prescriptions.isLoading ? (
         <div className="grid gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+            <div key={i} className="h-24 animate-pulse rounded-2xl border border-line bg-white" />
           ))}
         </div>
       ) : sorted.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 p-10 text-center animate-fade-in">
+        <div className="rounded-2xl border-2 border-dashed border-line-strong bg-white/60 p-10 text-center animate-fade-in">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-light text-brand">
             <RxIcon />
           </span>
-          <p className="mt-3 font-medium text-slate-700">{t("prescriptions.empty")}</p>
+          <p className="mt-3 font-medium text-ink-soft">{t("prescriptions.empty")}</p>
           <button
             type="button"
             onClick={() => setShowAdd(true)}
@@ -122,49 +122,49 @@ function PrescriptionCard({
   const del = useDeletePrescription();
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white shadow-soft overflow-hidden">
+    <div className="surface-card overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-start gap-3 p-4 text-left hover:bg-slate-50 transition"
+        className="w-full flex items-start gap-3 p-4 text-left hover:bg-canvas-soft transition"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-slate-900">
+            <span className="font-semibold text-ink">
               {rx.prescriptionDate}
             </span>
             {rx.profileName && (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+              <span className="chip-soft text-xs font-medium">
                 {rx.profileName}
               </span>
             )}
           </div>
           {rx.doctorName && (
-            <p className="mt-0.5 text-sm text-slate-500 truncate">{rx.doctorName}</p>
+            <p className="mt-0.5 text-sm text-mute truncate">{rx.doctorName}</p>
           )}
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-mute">
             {t("prescriptions.medicine_count", { count: rx.medicines.length })}
           </p>
         </div>
-        <ChevronIcon className={`size-4 text-slate-400 shrink-0 mt-0.5 transition ${expanded ? "rotate-180" : ""}`} />
+        <ChevronIcon className={`size-4 text-mute shrink-0 mt-0.5 transition ${expanded ? "rotate-180" : ""}`} />
       </button>
 
       {expanded && (
-        <div className="border-t border-slate-100 px-4 pb-4 pt-3 animate-fade-in">
+        <div className="border-t border-line px-4 pb-4 pt-3 animate-fade-in">
           {rx.notes && (
-            <p className="mb-3 text-sm text-slate-600 italic">{rx.notes}</p>
+            <p className="mb-3 text-sm text-ink-soft italic">{rx.notes}</p>
           )}
 
           {rx.medicines.length > 0 && (
             <div className="mb-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-mute">
                 {t("prescriptions.medicines_in_prescription")}
               </p>
               <div className="grid gap-2">
                 {rx.medicines.map((m, i) => (
-                  <div key={i} className="rounded-xl bg-slate-50 px-3 py-2">
-                    <p className="font-medium text-slate-800 text-sm">{m.name}</p>
-                    <p className="text-xs text-slate-500">
+                  <div key={i} className="rounded-xl bg-canvas-soft px-3 py-2">
+                    <p className="font-medium text-ink text-sm">{m.name}</p>
+                    <p className="text-xs text-mute">
                       {[m.activeIngredient, m.strength, m.form].filter(Boolean).join(" · ")}
                     </p>
                   </div>
@@ -182,7 +182,7 @@ function PrescriptionCard({
                   del.mutate(rx.id);
                 }
               }}
-              className="text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50 transition"
+              className="text-sm font-medium text-brand hover:text-brand-dark disabled:opacity-50 transition"
             >
               {t("common.delete")}
             </button>
@@ -237,11 +237,11 @@ function PrescriptionForm({
 
   return (
     <form onSubmit={handle} className="flex flex-col gap-3">
-      <p className="text-sm font-semibold text-slate-700">{t("prescriptions.add")}</p>
+      <p className="text-sm font-semibold text-ink-soft">{t("prescriptions.add")}</p>
 
       {profiles.data && profiles.data.length > 0 && (
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("prescriptions.profile")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("prescriptions.profile")}</span>
           <select className="input-base" {...form.register("profileId")}>
             <option value="">{t("prescriptions.no_profile")}</option>
             {profiles.data.map((p) => (
@@ -253,11 +253,11 @@ function PrescriptionForm({
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("prescriptions.doctor_name")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("prescriptions.doctor_name")}</span>
           <input className="input-base" {...form.register("doctorName")} />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("prescriptions.date")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("prescriptions.date")}</span>
           <input type="date" className="input-base" {...form.register("prescriptionDate")} />
           {form.formState.errors.prescriptionDate && (
             <span className="text-xs text-red-600">{form.formState.errors.prescriptionDate.message}</span>
@@ -266,25 +266,25 @@ function PrescriptionForm({
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-slate-700">{t("prescriptions.notes")}</span>
+        <span className="text-sm font-medium text-ink-soft">{t("prescriptions.notes")}</span>
         <textarea rows={2} className="input-base" {...form.register("notes")} />
       </label>
 
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-slate-700">{t("prescriptions.medicines_in_prescription")}</p>
+        <p className="text-sm font-medium text-ink-soft">{t("prescriptions.medicines_in_prescription")}</p>
         {fields.map((field, i) => (
-          <div key={field.id} className="relative rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div key={field.id} className="relative rounded-xl border border-line bg-canvas-soft p-3">
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1 col-span-2">
-                <span className="text-xs text-slate-500">{t("medicine.name")} *</span>
+                <span className="text-xs text-mute">{t("medicine.name")} *</span>
                 <input className="input-base text-sm" {...form.register(`medicines.${i}.name`)} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-xs text-slate-500">{t("medicine.active_ingredient")}</span>
+                <span className="text-xs text-mute">{t("medicine.active_ingredient")}</span>
                 <input className="input-base text-sm" {...form.register(`medicines.${i}.activeIngredient`)} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-xs text-slate-500">{t("medicine.strength")}</span>
+                <span className="text-xs text-mute">{t("medicine.strength")}</span>
                 <input className="input-base text-sm" {...form.register(`medicines.${i}.strength`)} />
               </label>
             </div>
@@ -292,7 +292,7 @@ function PrescriptionForm({
               <button
                 type="button"
                 onClick={() => remove(i)}
-                className="absolute right-2 top-2 text-xs text-slate-400 hover:text-red-600 transition"
+                className="absolute right-2 top-2 text-xs text-mute hover:text-brand-dark transition"
               >
                 {t("prescriptions.remove_medicine_row")}
               </button>

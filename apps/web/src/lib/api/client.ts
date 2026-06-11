@@ -14,6 +14,7 @@ export interface MeDto {
   email: string;
   firstName: string | null;
   lastName: string | null;
+  image: string | null;
   locale: string;
   timeZone: string;
   emailVerified: boolean;

@@ -31,7 +31,7 @@ function ProfilePage() {
   const updateProfile = useUpdateProfile();
 
   if (me.isLoading) {
-    return <p className="p-6 text-slate-500">{t("common.loading")}</p>;
+    return <p className="p-6 text-mute">{t("common.loading")}</p>;
   }
   if (!me.data) return null;
   const user = me.data;
@@ -40,18 +40,18 @@ function ProfilePage() {
     <main className="mx-auto max-w-xl p-4 pb-24">
       <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold text-brand">{t("profile.title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">{t("profile.title")}</h1>
       </div>
 
       <NameSection />
 
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+      <section className="mb-6 surface-card p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-mute">
           {t("profile.account")}
         </h2>
         <dl className="grid gap-3 text-sm">
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-slate-500">{t("auth.email")}</dt>
+            <dt className="text-mute">{t("auth.email")}</dt>
             <dd className="flex items-center gap-2 font-medium">
               {user.email}
               {!user.hasPassword && (
@@ -62,7 +62,7 @@ function ProfilePage() {
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">
-            <dt className="text-slate-500">{t("profile.member_since")}</dt>
+            <dt className="text-mute">{t("profile.member_since")}</dt>
             <dd className="font-medium">
               {new Intl.DateTimeFormat(i18n.language, {
                 year: "numeric",
@@ -76,8 +76,8 @@ function ProfilePage() {
 
       <StatsSection />
 
-      <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+      <section className="mb-6 surface-card p-5">
+        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-mute">
           {t("profile.preferences")}
         </h2>
         <div className="grid gap-4">
@@ -89,10 +89,10 @@ function ProfilePage() {
                   key={lang}
                   onClick={() => updateProfile.mutate({ locale: lang })}
                   disabled={updateProfile.isPending}
-                  className={`flex-1 rounded-md border px-3 py-2 text-sm transition ${
+                  className={`flex-1 rounded-field border px-3 py-2 text-sm font-medium transition ${
                     user.locale === lang
-                      ? "border-brand bg-brand text-white"
-                      : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                      ? "border-brand bg-brand-light text-brand-dark"
+                      : "border-line-strong bg-white text-ink-soft hover:bg-canvas-soft"
                   }`}
                 >
                   {lang === "tr" ? "Türkçe" : "English"}
@@ -107,7 +107,7 @@ function ProfilePage() {
               value={user.timeZone}
               onChange={(e) => updateProfile.mutate({ timeZone: e.target.value })}
               disabled={updateProfile.isPending}
-              className="rounded-md border border-slate-300 px-3 py-2"
+              className="input-base"
             >
               {TIMEZONES.map((tz) => (
                 <option key={tz} value={tz}>
@@ -125,13 +125,13 @@ function ProfilePage() {
       {user.hasPassword && <ChangePasswordSection />}
       {!user.hasPassword && <SetPasswordSection />}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+      <section className="surface-card p-5">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-mute">
           {t("profile.data_and_privacy")}
         </h2>
         <Link
           to="/settings"
-          className="block rounded-md border border-slate-300 px-4 py-3 text-sm text-slate-800 hover:bg-slate-50"
+          className="block rounded-field border border-line-strong px-4 py-3 text-sm text-ink transition hover:bg-canvas-soft"
         >
           {t("profile.manage_data")}
         </Link>
@@ -168,18 +168,18 @@ function NameSection() {
   };
 
   return (
-    <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <section className="mb-6 surface-card p-5">
+      <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-mute">
         {t("profile.name")}
       </h2>
       {!editing ? (
         <div className="flex items-center justify-between gap-3">
           <p className="text-lg font-medium">
-            {current || <span className="text-slate-400">{t("profile.no_name")}</span>}
+            {current || <span className="text-mute">{t("profile.no_name")}</span>}
           </p>
           <button
             onClick={start}
-            className="rounded-md border border-slate-300 px-3 py-1.5 text-sm hover:bg-slate-50"
+            className="btn-secondary px-3 py-1.5 text-sm"
           >
             {t("common.edit")}
           </button>
@@ -191,14 +191,14 @@ function NameSection() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder={t("profile.first_name")}
-              className="rounded-md border border-slate-300 px-3 py-2"
+              className="input-base"
               autoComplete="given-name"
             />
             <input
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder={t("profile.last_name")}
-              className="rounded-md border border-slate-300 px-3 py-2"
+              className="input-base"
               autoComplete="family-name"
             />
           </div>
@@ -206,13 +206,13 @@ function NameSection() {
             <button
               onClick={save}
               disabled={update.isPending}
-              className="flex-1 rounded-md bg-brand px-4 py-2 text-white hover:bg-brand-dark disabled:opacity-60"
+              className="btn-primary flex-1 disabled:opacity-60"
             >
               {update.isPending ? t("common.saving") : t("common.save")}
             </button>
             <button
               onClick={() => setEditing(false)}
-              className="rounded-md border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50"
+              className="btn-secondary"
             >
               {t("common.cancel")}
             </button>
@@ -257,11 +257,11 @@ function StatCard({
       ? "text-brand-dark"
       : tone === "amber"
         ? "text-amber-700"
-        : "text-slate-900";
+        : "text-ink";
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 text-center">
+    <div className="surface-card p-4 text-center">
       <p className={`text-2xl font-bold ${toneCls}`}>{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{label}</p>
+      <p className="mt-1 text-xs text-mute">{label}</p>
     </div>
   );
 }
@@ -312,8 +312,8 @@ function ChangePasswordSection() {
   });
 
   return (
-    <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <section className="mb-6 surface-card p-5">
+      <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-mute">
         {t("profile.change_password")}
       </h2>
       <form onSubmit={submit} className="flex flex-col gap-3">
@@ -321,7 +321,7 @@ function ChangePasswordSection() {
           type="password"
           autoComplete="current-password"
           placeholder={t("profile.current_password")}
-          className="rounded-md border border-slate-300 px-3 py-2"
+          className="input-base"
           {...form.register("currentPassword")}
         />
         {form.formState.errors.currentPassword && (
@@ -333,7 +333,7 @@ function ChangePasswordSection() {
           type="password"
           autoComplete="new-password"
           placeholder={t("profile.new_password")}
-          className="rounded-md border border-slate-300 px-3 py-2"
+          className="input-base"
           {...form.register("newPassword")}
         />
         {form.formState.errors.newPassword && (
@@ -343,7 +343,7 @@ function ChangePasswordSection() {
           type="password"
           autoComplete="new-password"
           placeholder={t("profile.confirm_password")}
-          className="rounded-md border border-slate-300 px-3 py-2"
+          className="input-base"
           {...form.register("confirmPassword")}
         />
         {form.formState.errors.confirmPassword && (
@@ -358,7 +358,7 @@ function ChangePasswordSection() {
         <button
           type="submit"
           disabled={change.isPending}
-          className="rounded-md bg-brand px-4 py-2 text-white hover:bg-brand-dark disabled:opacity-60"
+          className="btn-primary disabled:opacity-60"
         >
           {change.isPending ? t("common.saving") : t("profile.change_password")}
         </button>
@@ -395,17 +395,17 @@ function SetPasswordSection() {
   });
 
   return (
-    <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-5">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">
+    <section className="mb-6 surface-card p-5">
+      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-mute">
         {t("profile.set_password")}
       </h2>
-      <p className="mb-4 text-sm text-slate-600">{t("profile.set_password_hint")}</p>
+      <p className="mb-4 text-sm text-ink-soft">{t("profile.set_password_hint")}</p>
       <form onSubmit={submit} className="flex flex-col gap-3">
         <input
           type="password"
           autoComplete="new-password"
           placeholder={t("profile.new_password")}
-          className="rounded-md border border-slate-300 px-3 py-2"
+          className="input-base"
           {...form.register("newPassword")}
         />
         {form.formState.errors.newPassword && (
@@ -415,7 +415,7 @@ function SetPasswordSection() {
           type="password"
           autoComplete="new-password"
           placeholder={t("profile.confirm_password")}
-          className="rounded-md border border-slate-300 px-3 py-2"
+          className="input-base"
           {...form.register("confirmPassword")}
         />
         {form.formState.errors.confirmPassword && (
@@ -424,7 +424,7 @@ function SetPasswordSection() {
         <button
           type="submit"
           disabled={qc.isPending}
-          className="rounded-md bg-brand px-4 py-2 text-white hover:bg-brand-dark disabled:opacity-60"
+          className="btn-primary disabled:opacity-60"
         >
           {qc.isPending ? t("common.saving") : t("profile.set_password")}
         </button>

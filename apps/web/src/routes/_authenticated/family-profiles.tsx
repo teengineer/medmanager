@@ -43,7 +43,7 @@ function FamilyProfilesPage() {
     <main className="mx-auto max-w-2xl p-4 pb-24 sm:p-6">
       <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
           {t("family_profiles.title")}
         </h1>
       </div>
@@ -59,7 +59,7 @@ function FamilyProfilesPage() {
       </div>
 
       {showAdd && (
-        <div className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft animate-rise">
+        <div className="surface-card mb-4 p-4 animate-rise">
           <ProfileForm
             onSave={() => setShowAdd(false)}
             onCancel={() => setShowAdd(false)}
@@ -70,15 +70,15 @@ function FamilyProfilesPage() {
       {profiles.isLoading ? (
         <div className="grid gap-3">
           {[1, 2].map((i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+            <div key={i} className="h-20 animate-pulse rounded-2xl border border-line bg-white" />
           ))}
         </div>
       ) : !profiles.data || profiles.data.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 p-10 text-center animate-fade-in">
+        <div className="rounded-2xl border-2 border-dashed border-line-strong bg-white/60 p-10 text-center animate-fade-in">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-brand-light text-brand">
             <PeopleIcon />
           </span>
-          <p className="mt-3 font-medium text-slate-700">{t("family_profiles.empty")}</p>
+          <p className="mt-3 font-medium text-ink-soft">{t("family_profiles.empty")}</p>
           <button
             type="button"
             onClick={() => setShowAdd(true)}
@@ -120,7 +120,7 @@ function ProfileCard({
 
   if (isEditing) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft animate-rise">
+      <div className="surface-card p-4 animate-rise">
         <ProfileForm
           initial={profile}
           onSave={onEditDone}
@@ -131,7 +131,7 @@ function ProfileCard({
   }
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+    <div className="surface-card flex items-center gap-3 p-4">
       <div
         className="size-10 shrink-0 rounded-full flex items-center justify-center text-sm font-bold text-white"
         style={{ backgroundColor: profile.color ?? "#94A3B8" }}
@@ -139,16 +139,16 @@ function ProfileCard({
         {profile.name.charAt(0).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-slate-900 truncate">{profile.name}</p>
+        <p className="font-semibold text-ink truncate">{profile.name}</p>
         {profile.relation && (
-          <p className="text-sm text-slate-500 truncate">{profile.relation}</p>
+          <p className="text-sm text-mute truncate">{profile.relation}</p>
         )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <button
           type="button"
           onClick={onEdit}
-          className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+          className="flex size-8 items-center justify-center rounded-full text-mute transition hover:bg-canvas hover:text-ink"
           aria-label={t("common.edit")}
         >
           <EditIcon />
@@ -161,7 +161,7 @@ function ProfileCard({
               del.mutate(profile.id);
             }
           }}
-          className="flex size-8 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+          className="flex size-8 items-center justify-center rounded-full text-mute transition hover:bg-brand-50 hover:text-brand-dark disabled:opacity-50"
           aria-label={t("common.delete")}
         >
           <TrashIcon />
@@ -212,13 +212,13 @@ function ProfileForm({
 
   return (
     <form onSubmit={handle} className="flex flex-col gap-3">
-      <p className="text-sm font-semibold text-slate-700">
+      <p className="text-sm font-semibold text-ink-soft">
         {initial ? t("family_profiles.edit") : t("family_profiles.add")}
       </p>
 
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("family_profiles.name")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("family_profiles.name")}</span>
           <input
             className="input-base"
             placeholder="Anne, Baba…"
@@ -229,7 +229,7 @@ function ProfileForm({
           )}
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium text-slate-700">{t("family_profiles.relation")}</span>
+          <span className="text-sm font-medium text-ink-soft">{t("family_profiles.relation")}</span>
           <input
             className="input-base"
             placeholder={t("family_profiles.relation_placeholder")}
@@ -239,14 +239,14 @@ function ProfileForm({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium text-slate-700">{t("family_profiles.color")}</span>
+        <span className="text-sm font-medium text-ink-soft">{t("family_profiles.color")}</span>
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => form.setValue("color", "", { shouldDirty: true })}
             className={`size-7 rounded-full border-2 transition ${
-              !selectedColor ? "border-brand shadow-brand scale-110" : "border-slate-300"
-            } bg-slate-200`}
+              !selectedColor ? "border-brand shadow-brand scale-110" : "border-line-strong"
+            } bg-line`}
             aria-label="No color"
           />
           {PRESET_COLORS.map((c) => (
@@ -255,7 +255,7 @@ function ProfileForm({
               type="button"
               onClick={() => form.setValue("color", c, { shouldDirty: true })}
               className={`size-7 rounded-full border-2 transition ${
-                selectedColor === c ? "border-slate-900 scale-110 shadow-md" : "border-transparent hover:scale-105"
+                selectedColor === c ? "border-ink scale-110 shadow-pop" : "border-transparent hover:scale-105"
               }`}
               style={{ backgroundColor: c }}
               aria-label={c}

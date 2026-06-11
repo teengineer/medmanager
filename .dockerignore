@@ -6,7 +6,7 @@
 **/.tanstack
 .pnpm-store
 
-# Local SQLite (prod uses Turso)
+# Local SQLite leftovers (prod uses Neon PostgreSQL)
 *.db
 *.db-journal
 *.db-wal

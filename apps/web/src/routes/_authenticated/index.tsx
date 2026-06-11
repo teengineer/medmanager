@@ -23,22 +23,22 @@ function HomePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-10">
       {/* Hero greeting */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200/70 bg-gradient-to-br from-white via-white to-brand-50 p-6 shadow-soft sm:p-8 animate-rise">
-        <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-brand/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 size-56 rounded-full bg-accent/10 blur-3xl" />
+      <section className="relative overflow-hidden rounded-[2rem] border border-line bg-gradient-to-br from-white via-white to-brand-50 p-6 shadow-soft sm:p-8 animate-rise">
+        <div className="pointer-events-none absolute -right-12 -top-12 size-48 rounded-full bg-brand/8 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 size-56 rounded-full bg-accent/8 blur-3xl" />
         <div className="relative">
-          <p className="text-sm font-medium uppercase tracking-wider text-brand-dark/70">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-brand/80">
             Bundan Var
           </p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+          <h1 className="mt-1.5 text-3xl font-bold tracking-tight text-ink sm:text-4xl">
             {t("hello")}
             {me.data && (
-              <span className="ml-2 bg-gradient-to-r from-brand to-brand-dark bg-clip-text text-transparent">
+              <span className="ml-2 bg-gradient-to-r from-brand-400 to-brand-dark bg-clip-text text-transparent">
                 {displayName(me.data)}
               </span>
             )}
           </h1>
-          <p className="mt-2 max-w-md text-slate-600">{t("tagline")}</p>
+          <p className="mt-2 max-w-md text-ink-soft/80">{t("tagline")}</p>
         </div>
       </section>
 
@@ -112,7 +112,7 @@ function HomePage() {
       {notifications.supported && notifications.configured && !notifications.subscribed && (
         <button
           onClick={() => void notifications.enable()}
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-white px-4 py-3 text-sm font-medium text-brand shadow-soft transition hover:border-brand hover:bg-brand-50"
+          className="mt-6 flex w-full items-center justify-center gap-2 rounded-full border border-brand-200 bg-white px-4 py-3 text-sm font-medium text-brand shadow-soft transition hover:border-brand-300 hover:bg-brand-50"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
             <path d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .53-.21 1.04-.59 1.42L4 17h5" strokeLinecap="round" strokeLinejoin="round" />
@@ -153,13 +153,13 @@ function StatCard({
       ? "text-brand-dark"
       : tone === "amber"
         ? "text-amber-700"
-        : "text-slate-900";
+        : "text-ink";
   const iconCls =
     tone === "brand"
       ? "bg-brand-light text-brand-dark"
       : tone === "amber"
-        ? "bg-amber-100 text-amber-700"
-        : "bg-slate-100 text-slate-600";
+        ? "bg-amber-50 text-amber-600"
+        : "bg-canvas text-ink-soft";
 
   const content = (
     <>
@@ -174,7 +174,7 @@ function StatCard({
   );
 
   const className =
-    "surface-card flex flex-col items-center gap-1.5 p-4 transition hover:-translate-y-0.5 hover:shadow-pop hover:border-slate-300 active:scale-[0.98]";
+    "surface-card flex flex-col items-center gap-1.5 p-4 transition hover:-translate-y-0.5 hover:shadow-pop active:scale-[0.98]";
 
   if (to) {
     return (
@@ -203,10 +203,10 @@ function ActionCard({
   return (
     <Link
       to={to}
-      className={`group relative overflow-hidden rounded-2xl p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-pop ${
+      className={`group relative overflow-hidden rounded-card p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-pop ${
         isBrand
-          ? "border border-brand/30 bg-gradient-to-br from-brand to-brand-dark text-white"
-          : "border border-slate-200 bg-white text-slate-900"
+          ? "border border-brand-300/40 bg-gradient-to-br from-brand-400 via-brand to-brand-dark text-white"
+          : "border border-line bg-white text-ink"
       }`}
     >
       {isBrand && (
@@ -214,17 +214,17 @@ function ActionCard({
       )}
       <div className="relative flex items-start gap-3">
         <span
-          className={`flex size-12 shrink-0 items-center justify-center rounded-xl ${
-            isBrand ? "bg-white/15 text-white" : "bg-brand-light text-brand"
+          className={`flex size-12 shrink-0 items-center justify-center rounded-2xl ${
+            isBrand ? "bg-white/15 text-white" : "bg-brand-50 text-brand"
           }`}
         >
           {icon}
         </span>
         <div className="flex-1">
-          <p className={`text-base font-semibold ${isBrand ? "text-white" : "text-slate-900"}`}>
+          <p className={`text-base font-semibold ${isBrand ? "text-white" : "text-ink"}`}>
             {title}
           </p>
-          <p className={`mt-0.5 text-sm ${isBrand ? "text-white/80" : "text-mute"}`}>
+          <p className={`mt-0.5 text-sm ${isBrand ? "text-white/85" : "text-mute"}`}>
             {subtitle}
           </p>
         </div>

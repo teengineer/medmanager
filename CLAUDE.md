@@ -15,7 +15,7 @@ Installable **PWA** for household medicine inventory. Users log medicines (name,
 |---|---|
 | Framework | **TanStack Start** (`@tanstack/react-start`) — full-stack React, SSR, file-based routes, server functions / API routes |
 | Frontend | React 19 + TanStack Router (file-based) + TanStack Query + Tailwind v4 + `vite-plugin-pwa` + `react-i18next` |
-| Backend (same app) | Server functions + API routes under `src/routes/api/`. Drizzle ORM + libsql (SQLite local / Turso remote). |
+| Backend (same app) | Server functions + API routes under `src/routes/api/`. Drizzle ORM + PostgreSQL (Neon) via `pg`. |
 | Auth | **Better Auth** (`better-auth`) with Drizzle adapter. Email/password + Google OAuth. Sessions via cookies. |
 | Web Push | `web-push` npm, VAPID config in env |
 | Build / runtime | Vite 7, Node 22, single Node process (`server.mjs`) |
@@ -26,7 +26,7 @@ Installable **PWA** for household medicine inventory. Users log medicines (name,
 - **TanStack Start** — frontend ve backend tek uygulamada, tek deploy, aynı dilde tip güvenliği.
 - **Better Auth** — email verify, password reset, 2FA, magic link "ücretsiz". Sıfır kullanıcı varken risk yok.
 - **Tailwind v4** — CSS-first config, ~10x build hızı.
-- **Drizzle + libsql** — local SQLite for dev/self-host; same code with managed Turso in prod via URL swap.
+- **Drizzle + PostgreSQL (Neon)** — managed serverless Postgres; dev and prod use the same `DATABASE_URL` connection string.
 
 ## Repo layout
 
@@ -60,7 +60,7 @@ apps/
         medicines.ts            shared zod schemas + loadWithTags
         expiry.ts               cron handler logic
       db/
-        index.ts                drizzle + libsql client
+        index.ts                drizzle + pg pool client
         schema.ts               user/session/account/verification (Better Auth) + medicines/use-cases/push
         seed.ts                 50 use-cases seed
       sw/sw.ts                  service worker (Workbox)
@@ -80,7 +80,7 @@ pnpm-workspace.yaml             apps/* only
 
 ```bash
 pnpm install
-pnpm db:migrate                 # creates bundanvar.db, applies schema, seeds use-cases
+pnpm db:migrate                 # applies schema to Neon PostgreSQL, seeds use-cases
 pnpm dev                        # http://localhost:5173 — SSR + API combined
 pnpm typecheck
 pnpm lint
@@ -126,10 +126,9 @@ pnpm db:studio                  # drizzle studio
 
 - **Docker → Dokploy** (single container runs SSR + API). See `DEPLOY.md`, `Dockerfile`, `docker-compose.yml`.
 - Container start runs `pnpm db:migrate` (Drizzle migrate + seed, both idempotent) then `node server.mjs`.
-- DB is remote libsql (Turso) — container is stateless, no volume.
+- DB is remote PostgreSQL (Neon) — container is stateless, no volume.
 - Required env vars (Dokploy service env):
-  - `DATABASE_URL` — Turso libsql URL (e.g. `libsql://...turso.io`)
-  - `DATABASE_AUTH_TOKEN` — Turso token
+  - `DATABASE_URL` — Neon PostgreSQL connection string (pooled endpoint, `sslmode=require`)
   - `BETTER_AUTH_SECRET` — long random (Better Auth signs sessions with this)
   - `BETTER_AUTH_URL` — production origin (e.g. `https://bundanvar.ilg.az`)
   - `WEB_ORIGIN` — same as above (added to `trustedOrigins`)

@@ -23,6 +23,7 @@ async function meDto(u: typeof userTable.$inferSelect) {
     email: u.email,
     firstName: u.firstName,
     lastName: u.lastName,
+    image: u.image ?? null,
     locale: u.locale,
     timeZone: u.timeZone,
     emailVerified: u.emailVerified,

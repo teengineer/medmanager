@@ -6,7 +6,7 @@ export function BackButton({ className = "" }: { className?: string }) {
     <button
       type="button"
       onClick={() => window.history.back()}
-      className={`flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-brand hover:text-brand ${className}`}
+      className={`flex size-9 items-center justify-center rounded-full border border-line bg-white text-ink-soft shadow-soft transition hover:bg-canvas-soft hover:text-brand ${className}`}
       aria-label={t("common.back")}
     >
       <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">

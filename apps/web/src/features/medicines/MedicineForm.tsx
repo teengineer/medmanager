@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 import { useProfiles } from "../profiles/hooks";
+import { BarcodeScanner } from "./BarcodeScanner";
+import type { Gs1Result } from "./gs1";
 import { useCreateUseCase, useUseCases, type Medicine, type MedicineInput } from "./hooks";
 
 const schema = z.object({
@@ -12,6 +14,7 @@ const schema = z.object({
   activeIngredient: z.string().optional(),
   strength: z.string().optional(),
   form: z.string().optional(),
+  barcode: z.string().max(64).optional(),
   expiryDate: z.string().min(1),
   openedAt: z.string().optional(),
   openedShelfLifeDays: z
@@ -24,10 +27,11 @@ const schema = z.object({
     .optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
-  useCaseIds: z.array(z.string()).default([]),
+  useCaseIds: z.array(z.string()),
 });
 
-type FormValues = z.infer<typeof schema>;
+type FormInput = z.input<typeof schema>;
+type FormValues = z.output<typeof schema>;
 
 interface Props {
   initial?: Medicine;
@@ -42,8 +46,10 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const createUseCase = useCreateUseCase();
   const profiles = useProfiles();
   const [query, setQuery] = useState("");
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanInfo, setScanInfo] = useState<Gs1Result | null>(null);
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: initial?.name ?? "",
@@ -51,6 +57,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       activeIngredient: initial?.activeIngredient ?? "",
       strength: initial?.strength ?? "",
       form: initial?.form ?? "",
+      barcode: initial?.barcode ?? "",
       expiryDate: initial?.expiryDate ?? "",
       openedAt: initial?.openedAt ?? "",
       openedShelfLifeDays: initial?.openedShelfLifeDays ?? undefined,
@@ -70,6 +77,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       activeIngredient: values.activeIngredient || undefined,
       strength: values.strength || undefined,
       form: values.form || undefined,
+      barcode: values.barcode || undefined,
       expiryDate: values.expiryDate,
       openedAt: values.openedAt || null,
       openedShelfLifeDays:
@@ -100,9 +108,47 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         </Field>
       )}
 
-      <Field label={t("medicine.name")} error={form.formState.errors.name?.message}>
+      <Field label={t("medicine.name")} error={form.formState.errors.name && t("common.required")}>
         <input className={inputCls} {...form.register("name")} />
       </Field>
+
+      <Field label={t("medicine.barcode")}>
+        <div className="flex gap-2">
+          <input className={inputCls} inputMode="numeric" placeholder="8699…" {...form.register("barcode")} />
+          <button
+            type="button"
+            onClick={() => setScannerOpen(true)}
+            className="btn-secondary shrink-0 whitespace-nowrap text-sm"
+          >
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2" strokeLinecap="round" />
+              <path d="M7 12h2m2 0h2m2 0h2" strokeLinecap="round" />
+            </svg>
+            {t("medicine.scan_button")}
+          </button>
+        </div>
+        {scanInfo && (scanInfo.gtin || scanInfo.expiryDate) && (
+          <span className="text-xs font-medium text-emerald-700">
+            {scanInfo.expiryDate
+              ? t("medicine.scan_filled", { date: scanInfo.expiryDate })
+              : t("medicine.scan_filled_barcode")}
+          </span>
+        )}
+      </Field>
+
+      {scannerOpen && (
+        <BarcodeScanner
+          onClose={() => setScannerOpen(false)}
+          onResult={(res) => {
+            if (res.gtin) form.setValue("barcode", res.gtin, { shouldDirty: true });
+            if (res.expiryDate) {
+              form.setValue("expiryDate", res.expiryDate, { shouldDirty: true, shouldValidate: true });
+            }
+            setScanInfo(res);
+            setScannerOpen(false);
+          }}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Field label={t("medicine.strength")}>
@@ -121,7 +167,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         <Field label={t("medicine.quantity")}>
           <input type="number" step="0.01" min="0" className={inputCls} {...form.register("quantity")} />
         </Field>
-        <Field label={t("medicine.unit")}>
+        <Field label={t("medicine.unit")} error={form.formState.errors.unit && t("common.required")}>
           <input className={inputCls} {...form.register("unit")} />
         </Field>
       </div>
@@ -136,7 +182,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         />
       </Field>
 
-      <Field label={t("medicine.expiry")}>
+      <Field label={t("medicine.expiry")} error={form.formState.errors.expiryDate && t("common.required")}>
         <input type="date" className={inputCls} {...form.register("expiryDate")} />
       </Field>
 
@@ -157,7 +203,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
 
       <Field label={t("medicine.use_cases")}>
         {useCases.isLoading ? (
-          <p className="text-sm text-slate-500">{t("common.loading")}</p>
+          <p className="text-sm text-mute">{t("common.loading")}</p>
         ) : (
           <div className="flex flex-col gap-2">
             <input
@@ -167,7 +213,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
               placeholder={t("medicine.use_case_search_placeholder")}
               className={inputCls}
             />
-            <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50/50 p-2">
+            <div className="flex max-h-40 flex-wrap gap-2 overflow-y-auto rounded-2xl border border-line bg-canvas-soft p-2">
               {(() => {
                 const normalized = query.trim().toLocaleLowerCase();
                 const filtered = (useCases.data ?? []).filter((uc) =>
@@ -195,8 +241,8 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
                       }}
                       className={`rounded-full px-3 py-1 text-sm font-medium transition ${
                         selected
-                          ? "bg-gradient-to-br from-brand to-brand-dark text-white shadow-brand"
-                          : "border border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                          ? "bg-brand-light text-brand-dark"
+                          : "border border-line bg-white text-ink-soft hover:border-line-strong hover:bg-canvas-soft"
                       }`}
                     >
                       {uc.name}
@@ -228,7 +274,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
 
                 if (tags.length === 0) {
                   return (
-                    <span className="text-sm text-slate-500">
+                    <span className="text-sm text-mute">
                       {t("medicine.no_use_cases")}
                     </span>
                   );
@@ -256,7 +302,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
 function ImageInput({
   form,
 }: {
-  form: ReturnType<typeof useForm<FormValues>>;
+  form: UseFormReturn<FormInput, unknown, FormValues>;
 }) {
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string | null>(form.getValues("image") ?? null);
@@ -306,11 +352,11 @@ function ImageInput({
         </button>
         {preview && (
           <div className="flex flex-col gap-2">
-            <img src={preview} alt="Medicine" className="h-40 w-full rounded-lg object-contain" />
+            <img src={preview} alt="Medicine" className="h-40 w-full rounded-2xl object-contain" />
             <button
               type="button"
               onClick={handleClearImage}
-              className="w-full rounded-lg bg-red-500 px-3 py-2 text-sm font-medium text-white hover:bg-red-600"
+              className="w-full rounded-full border border-brand-100 bg-brand-50 px-3 py-2 text-sm font-medium text-brand-dark hover:bg-brand-100"
             >
               {t("common.remove")}
             </button>
@@ -334,7 +380,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-sm font-medium text-ink-soft">{label}</span>
       {children}
       {error && <span className="text-xs text-red-600">{error}</span>}
     </label>

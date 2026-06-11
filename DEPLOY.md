@@ -2,7 +2,7 @@
 
 Bundan Var is a single [TanStack Start](https://tanstack.com/start) app (`apps/web`)
 that serves SSR pages **and** the API from one Node process (`server.mjs`). The
-database is remote libsql ([Turso](https://turso.tech)), so the container is
+database is remote PostgreSQL ([Neon](https://neon.tech)), so the container is
 stateless — no volumes required.
 
 The repo ships a root **`Dockerfile`** (build + run) and a **`docker-compose.yml`**
@@ -12,13 +12,9 @@ The repo ships a root **`Dockerfile`** (build + run) and a **`docker-compose.yml
 
 ## 1. Prerequisites
 
-1. **Turso database**
-
-   ```bash
-   turso db create bundanvar
-   turso db show --url bundanvar          # -> DATABASE_URL
-   turso db tokens create bundanvar       # -> DATABASE_AUTH_TOKEN
-   ```
+1. **Neon database** — create a project at <https://console.neon.tech> and copy
+   the pooled connection string (`postgresql://...-pooler...neon.tech/...?sslmode=require`)
+   → `DATABASE_URL`.
 
 2. **Secrets**
 
@@ -41,8 +37,7 @@ full template.
 
 | Variable | Required | Notes |
 |---|---|---|
-| `DATABASE_URL` | ✅ | `libsql://<db>.turso.io` |
-| `DATABASE_AUTH_TOKEN` | ✅ | Turso token |
+| `DATABASE_URL` | ✅ | Neon PostgreSQL connection string (pooled endpoint) |
 | `BETTER_AUTH_SECRET` | ✅ | `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | ✅ | Public origin, e.g. `https://bundanvar.ilg.az` (no trailing slash) |
 | `WEB_ORIGIN` | ✅ | Same as `BETTER_AUTH_URL` |
@@ -96,7 +91,7 @@ populated (proves migrations + seed ran).
 ## 5. Local Docker test (optional)
 
 ```bash
-cp .env.example .env        # fill in Turso + secrets
+cp .env.example .env        # fill in Neon + secrets
 docker compose up --build
 # open http://localhost:3000
 ```
@@ -105,7 +100,7 @@ docker compose up --build
 
 ## Notes
 
-- **No volume needed** — all data lives in Turso.
+- **No volume needed** — all data lives in Neon.
 - `netlify.toml` and `apps/web/netlify/` are leftovers from the previous Netlify
   setup and are ignored by Docker (see `.dockerignore`). Safe to delete if you
   only deploy via Dokploy.

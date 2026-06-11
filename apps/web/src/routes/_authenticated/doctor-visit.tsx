@@ -61,11 +61,11 @@ function DoctorVisitPage() {
         {/* Page header */}
         <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               {t("doctor_visit.title")}
             </h1>
-            <p className="mt-1 text-sm text-slate-500">{today}</p>
-            <p className="mt-0.5 text-sm text-slate-400">{t("doctor_visit.subtitle")}</p>
+            <p className="mt-1 text-sm text-mute">{today}</p>
+            <p className="mt-0.5 text-sm text-mute">{t("doctor_visit.subtitle")}</p>
           </div>
           <button
             type="button"
@@ -84,12 +84,12 @@ function DoctorVisitPage() {
         {medicines.isLoading ? (
           <div className="grid gap-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 animate-pulse rounded-2xl border border-slate-200 bg-white" />
+              <div key={i} className="h-20 animate-pulse rounded-2xl border border-line bg-white" />
             ))}
           </div>
         ) : allItems.length === 0 ? (
-          <div className="rounded-2xl border-2 border-dashed border-slate-300 bg-white/60 p-10 text-center">
-            <p className="font-medium text-slate-500">{t("doctor_visit.no_medicines")}</p>
+          <div className="rounded-2xl border-2 border-dashed border-line-strong bg-white/60 p-10 text-center">
+            <p className="font-medium text-mute">{t("doctor_visit.no_medicines")}</p>
           </div>
         ) : (
           <>
@@ -104,7 +104,7 @@ function DoctorVisitPage() {
                     {profile?.color && (
                       <span className="size-3 rounded-full shrink-0" style={{ backgroundColor: profile.color }} />
                     )}
-                    <h2 className="text-base font-semibold text-slate-700">{groupLabel}</h2>
+                    <h2 className="text-base font-semibold text-ink-soft">{groupLabel}</h2>
                   </div>
                   <div className="grid gap-3">
                     {meds.map((m) => (
@@ -118,7 +118,7 @@ function DoctorVisitPage() {
             {/* Expired medicines */}
             {expiredItems.length > 0 && (
               <section className="mb-6">
-                <h2 className="mb-3 text-base font-semibold text-slate-400">
+                <h2 className="mb-3 text-base font-semibold text-mute">
                   {t("doctor_visit.expired_section")}
                 </h2>
                 <div className="grid gap-3 opacity-60">
@@ -132,7 +132,7 @@ function DoctorVisitPage() {
         )}
 
         {/* Disclaimer */}
-        <p className="mt-8 text-center text-xs text-slate-400">{t("doctor_visit.disclaimer")}</p>
+        <p className="mt-8 text-center text-xs text-mute">{t("doctor_visit.disclaimer")}</p>
       </main>
     </>
   );
@@ -151,19 +151,19 @@ function MedicineRow({
   return (
     <div
       className={`rounded-2xl border bg-white p-4 ${
-        muted ? "border-slate-100" : "border-slate-200 shadow-sm"
+        muted ? "border-line" : "border-line shadow-soft"
       }`}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <p className={`font-semibold ${muted ? "text-slate-400" : "text-slate-900"}`}>{m.name}</p>
-          <p className="mt-0.5 text-xs text-slate-500">
+          <p className={`font-semibold ${muted ? "text-mute" : "text-ink"}`}>{m.name}</p>
+          <p className="mt-0.5 text-xs text-mute">
             {[m.strength, m.form, m.activeIngredient ? `(${m.activeIngredient})` : null]
               .filter(Boolean)
               .join(" · ")}
           </p>
         </div>
-        <div className="text-right text-xs text-slate-500">
+        <div className="text-right text-xs text-mute">
           <p>
             {t("medicine.expiry")}: {fmt(m.expiryDate)}
           </p>
@@ -177,7 +177,7 @@ function MedicineRow({
           {m.useCases.map((uc) => (
             <span
               key={uc.id}
-              className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
+              className="chip-soft text-xs"
             >
               {uc.name}
             </span>

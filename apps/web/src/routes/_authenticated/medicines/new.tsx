@@ -17,7 +17,7 @@ function NewMedicinePage() {
     <main className="mx-auto max-w-xl p-4 pb-24">
       <div className="mb-6 flex items-center gap-3">
         <BackButton />
-        <h1 className="text-2xl font-bold text-brand">{t("medicine.add")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-ink">{t("medicine.add")}</h1>
       </div>
       <MedicineForm
         submitLabel={t("medicine.add")}
