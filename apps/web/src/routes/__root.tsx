@@ -34,8 +34,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { title: "Bundan Var" },
     ],
     links: [
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/icons/icon-192.png" },
+      { rel: "icon", href: "/favicon.png?v=2", type: "image/png" },
+      { rel: "apple-touch-icon", href: "/icons/icon-192.png?v=2" },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "stylesheet", href: appCss },
     ],
