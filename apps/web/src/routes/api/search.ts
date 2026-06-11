@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, eq, gt, inArray, isNotNull, like, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gt, inArray, isNotNull, like, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
-import { medicineUseCases, medicines, useCases } from "~/db/schema";
+import { medicineUseCases, medicines, useCases, type Medicine } from "~/db/schema";
 import { auth } from "~/lib/auth";
 import { localeFromUser } from "~/lib/locale";
 import { toMedicineDto } from "~/lib/medicines";
@@ -32,9 +32,14 @@ export const Route = createFileRoute("/api/search")({
         const locale = localeFromUser(session.user, request.headers.get("accept-language"));
         const { useCase, activeIngredient } = parsed.data;
 
+        // Results don't show photos — skip the (potentially multi-MB base64)
+        // image column so rows stay tiny on the wire.
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { image: _image, ...medicineCols } = getTableColumns(medicines);
+
         const rows = activeIngredient
           ? await db
-              .select({ medicine: medicines })
+              .select({ medicine: medicineCols })
               .from(medicines)
               .where(
                 and(
@@ -48,7 +53,7 @@ export const Route = createFileRoute("/api/search")({
                 ),
               )
           : await db
-              .select({ medicine: medicines })
+              .select({ medicine: medicineCols })
               .from(medicines)
               .innerJoin(medicineUseCases, eq(medicineUseCases.medicineId, medicines.id))
               .where(
@@ -83,7 +88,9 @@ export const Route = createFileRoute("/api/search")({
 
         const today = new Date().toISOString().slice(0, 10);
         const items = rows
-          .map((r) => toMedicineDto(r.medicine, byMedicine.get(r.medicine.id) ?? [], locale))
+          .map((r) =>
+            toMedicineDto({ ...r.medicine, image: null } as Medicine, byMedicine.get(r.medicine.id) ?? [], locale),
+          )
           .filter((d) => d.effectiveExpiry >= today)
           .sort((a, b) => a.effectiveExpiry.localeCompare(b.effectiveExpiry));
 

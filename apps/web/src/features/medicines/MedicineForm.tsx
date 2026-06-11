@@ -353,6 +353,45 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   );
 }
 
+// Downscale + JPEG-compress before storing: a raw phone photo is 3–5 MB and
+// would otherwise travel to the DB as a ~7 MB base64 string on every save/list.
+const IMAGE_MAX_DIMENSION = 1024;
+const IMAGE_JPEG_QUALITY = 0.8;
+
+async function compressImage(file: File): Promise<string> {
+  let source: ImageBitmap | HTMLImageElement;
+  try {
+    source = await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    // Fallback for browsers without createImageBitmap(file)
+    source = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("image load failed"));
+      };
+      img.src = url;
+    });
+  }
+
+  const width = "naturalWidth" in source ? source.naturalWidth : source.width;
+  const height = "naturalHeight" in source ? source.naturalHeight : source.height;
+  const scale = Math.min(1, IMAGE_MAX_DIMENSION / Math.max(width, height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(width * scale));
+  canvas.height = Math.max(1, Math.round(height * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("canvas unavailable");
+  ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+  if ("close" in source) source.close();
+  return canvas.toDataURL("image/jpeg", IMAGE_JPEG_QUALITY);
+}
+
 function ImageInput({
   form,
 }: {
@@ -361,23 +400,24 @@ function ImageInput({
   const { t } = useTranslation();
   const [preview, setPreview] = useState<string | null>(form.getValues("image") ?? null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const maxSizeBytes = 5 * 1024 * 1024;
+    // Generous cap — the photo is compressed client-side right after.
+    const maxSizeBytes = 20 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       alert(t("medicine.image_size_error"));
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      form.setValue("image", base64, { shouldDirty: true });
-      setPreview(base64);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await compressImage(file);
+      form.setValue("image", dataUrl, { shouldDirty: true });
+      setPreview(dataUrl);
+    } catch {
+      alert(t("medicine.image_size_error"));
+    }
   };
 
   const handleClearImage = () => {
