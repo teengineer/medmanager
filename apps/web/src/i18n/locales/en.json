@@ -114,7 +114,10 @@
     "scan_camera_error": "Could not access the camera. Check browser permissions.",
     "scan_generic_error": "Could not start scanning. This feature requires HTTPS or localhost.",
     "scan_filled": "Code scanned — expiry date filled as {{date}}.",
-    "scan_filled_barcode": "Barcode scanned and filled."
+    "scan_filled_barcode": "Barcode scanned and filled.",
+    "scan_product_loading": "Looking up product info…",
+    "scan_product_found": "{{name}} found — details filled in.",
+    "scan_product_not_found": "Product not found in the TİTCK list — enter details manually."
   },
   "check": {
     "title": "Check at the doctor",

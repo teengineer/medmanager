@@ -113,7 +113,10 @@
     "scan_camera_error": "Kameraya erişilemedi. Tarayıcı izinlerini kontrol edin.",
     "scan_generic_error": "Tarama başlatılamadı. Bu özellik HTTPS veya localhost gerektirir.",
     "scan_filled": "Karekod okundu — son kullanma tarihi {{date}} olarak dolduruldu.",
-    "scan_filled_barcode": "Barkod okundu ve dolduruldu."
+    "scan_filled_barcode": "Barkod okundu ve dolduruldu.",
+    "scan_product_loading": "Ürün bilgisi aranıyor…",
+    "scan_product_found": "{{name}} bulundu — bilgiler dolduruldu.",
+    "scan_product_not_found": "Ürün TİTCK listesinde bulunamadı — bilgileri elle girin."
   },
   "check": {
     "title": "Doktorda kontrol",

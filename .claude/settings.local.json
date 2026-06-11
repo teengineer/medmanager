@@ -53,7 +53,19 @@
       "WebFetch(domain:rehber.enabiz.gov.tr)",
       "WebFetch(domain:www.its.gov.tr)",
       "Bash(node -e ' *)",
-      "PowerShell(try { Get-NetTCPConnection -LocalPort 5173,5174,5175 -State Listen -ErrorAction Stop | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -Confirm:$false } } catch {}; \"ok\")"
+      "PowerShell(try { Get-NetTCPConnection -LocalPort 5173,5174,5175 -State Listen -ErrorAction Stop | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -Confirm:$false } } catch {}; \"ok\")",
+      "Bash(awk '{print $5, $9}')",
+      "WebFetch(domain:www.titck.gov.tr)",
+      "Bash(curl -sL -o titck.xlsx \"https://titck.gov.tr/storage/Archive/2026/dynamicModulesAttachment/RuhsatlBeeriTbbirnlerListesi05.06.2026_10f470a4-649a-42e5-b903-09e1406a5e02.xlsx\")",
+      "Bash(python -c \"import openpyxl; print\\('openpyxl ok'\\)\")",
+      "Bash(pip install *)",
+      "Bash(python -c ' *)",
+      "Bash(PYTHONIOENCODING=utf-8 python *)",
+      "Bash(pnpm db:import-drugs --file=\"C:/Users/Firdevs/AppData/Local/Temp/titck.xlsx\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/api/health)",
+      "Bash(curl -s -c jar.txt -X POST http://localhost:5173/api/auth/sign-up/email -H \"Content-Type: application/json\" -H \"Origin: http://localhost:5173\" -d '{\"email\":\"gtintest@example.com\",\"password\":\"Test12345!\",\"name\":\"Gtin Test\"}' -o /dev/null)",
+      "Bash(curl -s -b jar.txt \"http://localhost:5173/api/gtin/08699717010109\")",
+      "Bash(curl -s -b jar.txt -o /dev/null -w \"bilinmeyen barkod -> %{http_code}\\\\n\" \"http://localhost:5173/api/gtin/08699999999999\")"
     ]
   }
 }

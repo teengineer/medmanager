@@ -3,10 +3,21 @@ import { useRef, useState } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
+import { api } from "../../lib/api/client";
 import { useProfiles } from "../profiles/hooks";
 import { BarcodeScanner } from "./BarcodeScanner";
 import type { Gs1Result } from "./gs1";
 import { useCreateUseCase, useUseCases, type Medicine, type MedicineInput } from "./hooks";
+
+interface GtinLookup {
+  found: boolean;
+  name: string;
+  activeIngredient: string | null;
+  strength: string | null;
+  form: string | null;
+  packageCount: number | null;
+  packageUnit: string | null;
+}
 
 const schema = z.object({
   name: z.string().min(1).max(200),
@@ -48,6 +59,45 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const [query, setQuery] = useState("");
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanInfo, setScanInfo] = useState<Gs1Result | null>(null);
+  const [scanProduct, setScanProduct] = useState<"loading" | "not_found" | GtinLookup | null>(null);
+
+  const applyScan = async (res: Gs1Result) => {
+    if (res.gtin) form.setValue("barcode", res.gtin, { shouldDirty: true });
+    if (res.expiryDate) {
+      form.setValue("expiryDate", res.expiryDate, { shouldDirty: true, shouldValidate: true });
+    }
+    setScanInfo(res);
+    setScannerOpen(false);
+    if (!res.gtin) return;
+
+    setScanProduct("loading");
+    try {
+      const p = await api<GtinLookup>(`/gtin/${res.gtin}`);
+      setScanProduct(p);
+      // Fill only fields the user hasn't typed yet — never overwrite manual input.
+      if (p.name && !form.getValues("name")) {
+        form.setValue("name", p.name, { shouldDirty: true, shouldValidate: true });
+      }
+      if (p.activeIngredient && !form.getValues("activeIngredient")) {
+        form.setValue("activeIngredient", p.activeIngredient, { shouldDirty: true });
+      }
+      if (p.strength && !form.getValues("strength")) {
+        form.setValue("strength", p.strength, { shouldDirty: true });
+      }
+      if (p.form && !form.getValues("form")) {
+        form.setValue("form", p.form, { shouldDirty: true });
+      }
+      const qty = form.getValues("quantity");
+      if (p.packageCount && (qty === 1 || qty === "1" || qty === "" || qty == null)) {
+        form.setValue("quantity", p.packageCount, { shouldDirty: true });
+        if (p.packageUnit) {
+          form.setValue("unit", p.packageUnit, { shouldDirty: true, shouldValidate: true });
+        }
+      }
+    } catch {
+      setScanProduct("not_found");
+    }
+  };
 
   const form = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(schema),
@@ -134,19 +184,23 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
               : t("medicine.scan_filled_barcode")}
           </span>
         )}
+        {scanProduct === "loading" && (
+          <span className="text-xs text-mute">{t("medicine.scan_product_loading")}</span>
+        )}
+        {scanProduct === "not_found" && (
+          <span className="text-xs text-amber-700">{t("medicine.scan_product_not_found")}</span>
+        )}
+        {scanProduct && typeof scanProduct === "object" && (
+          <span className="text-xs font-medium text-emerald-700">
+            {t("medicine.scan_product_found", { name: scanProduct.name })}
+          </span>
+        )}
       </Field>
 
       {scannerOpen && (
         <BarcodeScanner
           onClose={() => setScannerOpen(false)}
-          onResult={(res) => {
-            if (res.gtin) form.setValue("barcode", res.gtin, { shouldDirty: true });
-            if (res.expiryDate) {
-              form.setValue("expiryDate", res.expiryDate, { shouldDirty: true, shouldValidate: true });
-            }
-            setScanInfo(res);
-            setScannerOpen(false);
-          }}
+          onResult={(res) => void applyScan(res)}
         />
       )}
 

@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
+    "db:import-drugs": "tsx scripts/import-drugs.ts",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run"
   },
@@ -58,6 +59,7 @@
     "typescript-eslint": "^8.18.1",
     "vite": "^7.0.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "xlsx": "^0.18.5"
   }
 }

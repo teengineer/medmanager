@@ -206,6 +206,15 @@ export const pushSubscriptions = pgTable(
   }),
 );
 
+// TİTCK licensed products reference list (public data, imported via scripts/import-drugs.ts)
+export const drugProducts = pgTable("drug_products", {
+  barcode: text("barcode").primaryKey(), // 13-digit EAN as published by TİTCK
+  name: text("name").notNull(),
+  activeIngredient: text("active_ingredient"),
+  atcCode: text("atc_code"),
+  updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
+});
+
 export type User = typeof user.$inferSelect;
 export type Medicine = typeof medicines.$inferSelect;
 export type UseCase = typeof useCases.$inferSelect;
