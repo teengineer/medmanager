@@ -117,7 +117,8 @@
     "scan_filled_barcode": "Barcode scanned and filled.",
     "scan_product_loading": "Looking up product info…",
     "scan_product_found": "{{name}} found — details filled in.",
-    "scan_product_not_found": "Product not found in the TİTCK list — enter details manually."
+    "scan_product_not_found": "Product not found in the TİTCK list — enter details manually.",
+    "scan_zoom": "Zoom"
   },
   "check": {
     "title": "Check at the doctor",

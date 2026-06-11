@@ -7,14 +7,25 @@ interface Props {
   onClose: () => void;
 }
 
+// zoom / focusMode are not yet in the TS lib for MediaTrack* types
+interface ExtendedCapabilities extends MediaTrackCapabilities {
+  zoom?: { min: number; max: number; step: number };
+  focusMode?: string[];
+}
+
 /**
  * Camera modal that scans GS1 DataMatrix (İTS karekod), QR and EAN-13 codes.
  * The zxing decoder is imported lazily so it never lands in the main bundle.
+ * Opens the camera at high resolution and exposes a digital zoom slider so
+ * small codes can be read without moving inside the lens' focus distance.
  */
 export function BarcodeScanner({ onResult, onClose }: Props) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const trackRef = useRef<MediaStreamTrack | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [zoom, setZoom] = useState<number | null>(null);
+  const [zoomCaps, setZoomCaps] = useState<{ min: number; max: number; step: number } | null>(null);
 
   // Keep latest callbacks in refs so the effect runs exactly once.
   const onResultRef = useRef(onResult);
@@ -37,11 +48,21 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
           BarcodeFormat.QR_CODE,
           BarcodeFormat.EAN_13,
         ]);
+        hints.set(DecodeHintType.TRY_HARDER, true);
         const reader = new BrowserMultiFormatReader(hints);
 
         if (stopped || !videoRef.current) return;
-        controls = await reader.decodeFromVideoDevice(
-          undefined, // default (environment-facing) camera
+        // High resolution lets zxing resolve small DataMatrix codes from a
+        // comfortable distance instead of forcing the user inside macro range.
+        controls = await reader.decodeFromConstraints(
+          {
+            audio: false,
+            video: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 2560 },
+              height: { ideal: 1440 },
+            },
+          },
           videoRef.current,
           (result) => {
             if (!result || stopped) return;
@@ -52,6 +73,30 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
             onResultRef.current(parsed);
           },
         );
+
+        // Post-setup: continuous autofocus + digital zoom where supported.
+        const stream = videoRef.current?.srcObject as MediaStream | null;
+        const track = stream?.getVideoTracks()[0] ?? null;
+        trackRef.current = track;
+        if (track && typeof track.getCapabilities === "function") {
+          const caps = track.getCapabilities() as ExtendedCapabilities;
+          if (caps.focusMode?.includes("continuous")) {
+            track
+              .applyConstraints({ advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet] })
+              .catch(() => {});
+          }
+          if (caps.zoom && caps.zoom.max > caps.zoom.min) {
+            const step = caps.zoom.step || 0.1;
+            setZoomCaps({ min: caps.zoom.min, max: caps.zoom.max, step });
+            // Start mildly zoomed-in: code appears larger while the box stays
+            // at a distance the lens can still focus on.
+            const initial = Math.min(caps.zoom.min + (caps.zoom.max - caps.zoom.min) * 0.35, 3);
+            setZoom(initial);
+            track
+              .applyConstraints({ advanced: [{ zoom: initial } as MediaTrackConstraintSet] })
+              .catch(() => {});
+          }
+        }
       } catch (err) {
         if (stopped) return;
         const name = err instanceof Error ? err.name : "";
@@ -74,6 +119,13 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
       document.removeEventListener("keydown", onKey);
     };
   }, [t]);
+
+  const applyZoom = (value: number) => {
+    setZoom(value);
+    trackRef.current
+      ?.applyConstraints({ advanced: [{ zoom: value } as MediaTrackConstraintSet] })
+      .catch(() => {});
+  };
 
   return (
     <div
@@ -110,6 +162,28 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                 <div className="size-44 rounded-2xl border-2 border-white/80 shadow-[0_0_0_9999px_rgba(15,23,42,0.35)]" />
               </div>
+              {zoomCaps && zoom !== null && (
+                <div className="absolute inset-x-6 bottom-3 flex items-center gap-2">
+                  <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-white/90" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M21 21l-4.3-4.3M9 11h4" strokeLinecap="round" />
+                  </svg>
+                  <input
+                    type="range"
+                    min={zoomCaps.min}
+                    max={zoomCaps.max}
+                    step={zoomCaps.step}
+                    value={zoom}
+                    onChange={(e) => applyZoom(Number(e.target.value))}
+                    className="h-1.5 w-full cursor-pointer accent-white"
+                    aria-label={t("medicine.scan_zoom")}
+                  />
+                  <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-white/90" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="M21 21l-4.3-4.3M9 11h4M11 9v4" strokeLinecap="round" />
+                  </svg>
+                </div>
+              )}
             </>
           )}
         </div>

@@ -116,7 +116,8 @@
     "scan_filled_barcode": "Barkod okundu ve dolduruldu.",
     "scan_product_loading": "Ürün bilgisi aranıyor…",
     "scan_product_found": "{{name}} bulundu — bilgiler dolduruldu.",
-    "scan_product_not_found": "Ürün TİTCK listesinde bulunamadı — bilgileri elle girin."
+    "scan_product_not_found": "Ürün TİTCK listesinde bulunamadı — bilgileri elle girin.",
+    "scan_zoom": "Yakınlaştırma"
   },
   "check": {
     "title": "Doktorda kontrol",
