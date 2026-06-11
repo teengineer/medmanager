@@ -165,8 +165,13 @@ function MedicineRow({
         </div>
         <div className="text-right text-xs text-mute">
           <p>
-            {t("medicine.expiry")}: {fmt(m.expiryDate)}
+            {t("medicine.effective_expiry")}: {fmt(m.effectiveExpiry)}
           </p>
+          {m.effectiveExpiry !== m.expiryDate && (
+            <p className="text-[11px] text-mute/80">
+              {t("medicine.expiry")}: {fmt(m.expiryDate)}
+            </p>
+          )}
           <p>
             {m.quantity} {m.unit}
           </p>
