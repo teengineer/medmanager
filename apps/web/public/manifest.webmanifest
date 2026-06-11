@@ -4,8 +4,8 @@
   "description": "Ev ilaç envanteri — gereksiz reçetelerden kaçın",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#E30A17",
+  "background_color": "#F4F8F7",
+  "theme_color": "#2FAEA0",
   "orientation": "portrait",
   "icons": [
     {

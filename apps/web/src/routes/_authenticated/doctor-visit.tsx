@@ -154,8 +154,8 @@ function MedicineRow({
         muted ? "border-line" : "border-line shadow-soft"
       }`}
     >
-      <div className="flex flex-wrap items-start justify-between gap-2">
-        <div>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <p className={`font-semibold ${muted ? "text-mute" : "text-ink"}`}>{m.name}</p>
           <p className="mt-0.5 text-xs text-mute">
             {[m.strength, m.form, m.activeIngredient ? `(${m.activeIngredient})` : null]
@@ -163,15 +163,12 @@ function MedicineRow({
               .join(" · ")}
           </p>
         </div>
-        <div className="text-right text-xs text-mute">
+        <div className="shrink-0 text-right text-xs text-mute">
           <p>
-            {t("medicine.effective_expiry")}: {fmt(m.effectiveExpiry)}
+            {m.effectiveExpiry !== m.expiryDate
+              ? `${t("medicine.effective_expiry")}: ${fmt(m.effectiveExpiry)}`
+              : `${t("medicine.expiry")}: ${fmt(m.expiryDate)}`}
           </p>
-          {m.effectiveExpiry !== m.expiryDate && (
-            <p className="text-[11px] text-mute/80">
-              {t("medicine.expiry")}: {fmt(m.expiryDate)}
-            </p>
-          )}
           <p>
             {m.quantity} {m.unit}
           </p>

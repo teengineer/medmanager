@@ -247,7 +247,23 @@ function MenuItem({
 }
 
 function LogoMark() {
-  return <img src="/favicon.png" alt="" className="size-8" />;
+  return (
+    <svg viewBox="0 0 48 48" className="size-8 rounded-xl shadow-brand" aria-hidden>
+      <defs>
+        <linearGradient id="bv-logo-bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#46C8B6" />
+          <stop offset="1" stopColor="#1E8C81" />
+        </linearGradient>
+      </defs>
+      <rect width="48" height="48" rx="12" fill="url(#bv-logo-bg)" />
+      <g transform="rotate(-32 24 24)">
+        <rect x="9" y="17.5" width="30" height="13" rx="6.5" fill="white" />
+        <path d="M24 17.5h8.5a6.5 6.5 0 0 1 0 13H24Z" fill="#B7A9F8" />
+        <rect x="23.6" y="17.5" width="0.8" height="13" fill="#1F8C81" opacity="0.25" />
+        <rect x="13" y="19.3" width="22" height="3" rx="1.5" fill="white" opacity="0.45" />
+      </g>
+    </svg>
+  );
 }
 
 function MedicinesIcon() {

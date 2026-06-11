@@ -65,7 +65,10 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/api/health)",
       "Bash(curl -s -c jar.txt -X POST http://localhost:5173/api/auth/sign-up/email -H \"Content-Type: application/json\" -H \"Origin: http://localhost:5173\" -d '{\"email\":\"gtintest@example.com\",\"password\":\"Test12345!\",\"name\":\"Gtin Test\"}' -o /dev/null)",
       "Bash(curl -s -b jar.txt \"http://localhost:5173/api/gtin/08699717010109\")",
-      "Bash(curl -s -b jar.txt -o /dev/null -w \"bilinmeyen barkod -> %{http_code}\\\\n\" \"http://localhost:5173/api/gtin/08699999999999\")"
+      "Bash(curl -s -b jar.txt -o /dev/null -w \"bilinmeyen barkod -> %{http_code}\\\\n\" \"http://localhost:5173/api/gtin/08699999999999\")",
+      "PowerShell(& \"C:\\\\Users\\\\Firdevs\\\\AppData\\\\Local\\\\Temp\\\\make-bundanvar-icons.ps1\")",
+      "PowerShell(pnpm typecheck *)",
+      "PowerShell(pnpm build *)"
     ]
   }
 }

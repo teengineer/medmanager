@@ -22,7 +22,7 @@ function AboutPage() {
       </Link>
 
       <div className="mt-6 flex items-center gap-3">
-        <img src="/favicon.png" alt="" className="size-12" />
+        <img src="/icons/icon-192.png" alt="" className="size-12" />
         <div>
           <h1 className="text-3xl font-bold text-brand">Bundan Var</h1>
           <p className="text-sm text-mute">{t("tagline")}</p>

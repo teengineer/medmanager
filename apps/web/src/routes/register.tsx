@@ -21,7 +21,7 @@ function RegisterPage() {
       <div className="flex min-h-dvh items-center justify-center p-6">
         <div className="w-full max-w-sm animate-rise">
           <div className="mb-6 flex flex-col items-center text-center">
-            <img src="/favicon.png" alt="" className="size-14" />
+            <img src="/icons/icon-192.png" alt="" className="size-14" />
             <h1 className="mt-4 bg-gradient-to-r from-brand-400 to-brand-dark bg-clip-text text-2xl font-bold text-transparent">
               Bundan Var
             </h1>
