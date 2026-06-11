@@ -122,7 +122,8 @@
     "scan_capture_analyzing": "Fotoğraf çözümleniyor…",
     "scan_capture_failed": "Fotoğraftan kod okunamadı — kodu çerçeveye alıp tekrar deneyin.",
     "scan_start": "Karekodu Okut",
-    "scan_start_hint": "Butona bastığınızda kamera açılır ve tarama başlar."
+    "scan_start_hint": "Butona bastığınızda kamera açılır ve tarama başlar.",
+    "remaining": "Kalan"
   },
   "check": {
     "title": "Doktorda kontrol",

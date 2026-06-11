@@ -22,10 +22,13 @@ export interface MedicineDto {
   isExpired: boolean;
   isOpened: boolean;
   quantity: number;
+  /** quantity minus logged "taken" doses — present on search results */
+  remainingQuantity?: number;
   unit: string;
   dosePerDay: number | null;
   notes: string | null;
-  image: string | null;
+  /** Versioned URL of the photo (served by /api/medicines/:id/image) — base64 never travels in JSON. */
+  imageUrl: string | null;
   archivedAt: string | null;
   useCases: UseCaseTag[];
 }
@@ -49,13 +52,20 @@ export function effectiveExpiryOf(
   return earlier.toISOString().slice(0, 10);
 }
 
+/** Row shape accepted by toMedicineDto: full row, or one queried without the
+ * heavy image column but carrying a hasImage flag instead. */
+export type MedicineForDto = Omit<Medicine, "image"> & {
+  image?: string | null;
+  hasImage?: boolean;
+};
+
 export interface MedicineWithTags {
-  medicine: Medicine;
+  medicine: MedicineForDto;
   tags: { useCaseId: string; slug: string; nameTr: string; nameEn: string }[];
 }
 
 export function toMedicineDto(
-  m: Medicine,
+  m: MedicineForDto,
   tags: MedicineWithTags["tags"],
   locale: "tr" | "en",
 ): MedicineDto {
@@ -83,7 +93,10 @@ export function toMedicineDto(
     unit: m.unit,
     dosePerDay: m.dosePerDay ?? null,
     notes: m.notes,
-    image: m.image ?? null,
+    imageUrl:
+      (m.hasImage ?? Boolean(m.image))
+        ? `/api/medicines/${m.id}/image?v=${encodeURIComponent(m.updatedAt)}`
+        : null,
     archivedAt: m.archivedAt ?? null,
     useCases: tags.map((tag) => ({
       id: tag.useCaseId,

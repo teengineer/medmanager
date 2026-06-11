@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNotNull, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
 import { medicineUseCases, medicines, useCases } from "~/db/schema";
@@ -100,7 +100,15 @@ export async function loadWithTags(
   } else {
     whereClause = and(eq(medicines.userId, userId), isNull(medicines.archivedAt));
   }
-  const rows = await db.select().from(medicines).where(whereClause).orderBy(asc(medicines.expiryDate));
+  // Skip the multi-MB base64 image column on list queries; expose hasImage so
+  // the DTO can still emit an imageUrl pointing at /api/medicines/:id/image.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { image: _image, ...medicineCols } = getTableColumns(medicines);
+  const rows = await db
+    .select({ ...medicineCols, hasImage: isNotNull(medicines.image).mapWith(Boolean) })
+    .from(medicines)
+    .where(whereClause)
+    .orderBy(asc(medicines.expiryDate));
   if (rows.length === 0) return [];
 
   const tagMap = await loadTagsForIds(rows.map((r) => r.id));

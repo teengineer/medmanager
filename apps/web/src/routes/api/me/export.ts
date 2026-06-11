@@ -45,7 +45,11 @@ export const Route = createFileRoute("/api/me/export")({
             timeZone: u.timeZone,
             createdAt: u.createdAt.toISOString(),
           },
-          medicines: mine.map((m) => toMedicineDto(m, tagsByMedicine.get(m.id) ?? [], locale)),
+          // Export keeps the raw base64 image for full data portability.
+          medicines: mine.map((m) => ({
+            ...toMedicineDto(m, tagsByMedicine.get(m.id) ?? [], locale),
+            image: m.image,
+          })),
         };
 
         const filename = `bundanvar-export-${new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19)}.json`;

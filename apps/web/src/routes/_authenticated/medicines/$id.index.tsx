@@ -129,10 +129,10 @@ function MedicineDetailPage() {
         </div>
 
         {/* Image */}
-        {m.image && (
+        {m.imageUrl && (
           <div className="mt-6">
             <img
-              src={m.image}
+              src={m.imageUrl}
               alt={m.name}
               className="h-40 w-full rounded-2xl object-contain"
             />

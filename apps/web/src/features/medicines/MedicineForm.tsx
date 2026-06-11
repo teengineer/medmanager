@@ -38,6 +38,7 @@ const schema = z.object({
     .optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
+  imageRemoved: z.boolean().optional(),
   useCaseIds: z.array(z.string()),
 });
 
@@ -115,7 +116,8 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       unit: initial?.unit ?? "tablet",
       dosePerDay: initial?.dosePerDay ?? undefined,
       notes: initial?.notes ?? "",
-      image: initial?.image ?? undefined,
+      image: undefined, // only set when the user picks a new photo
+      imageRemoved: false,
       useCaseIds: initial?.useCases.map((u) => u.id) ?? [],
     },
   });
@@ -136,7 +138,8 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       unit: values.unit,
       dosePerDay: typeof values.dosePerDay === "number" ? values.dosePerDay : null,
       notes: values.notes || undefined,
-      image: values.image || null,
+      // tri-state: new photo → send it; removed → null; untouched → undefined (PATCH keeps existing)
+      image: values.image ? values.image : values.imageRemoved ? null : undefined,
       useCaseIds: values.useCaseIds,
     };
     await onSubmit(input);
@@ -344,7 +347,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         <textarea rows={2} className={inputCls} {...form.register("notes")} />
       </Field>
 
-      <ImageInput form={form} />
+      <ImageInput form={form} initialImageUrl={initial?.imageUrl ?? null} />
 
       <button type="submit" disabled={pending} className="btn-primary mt-2 w-full">
         {pending ? t("common.saving") : submitLabel}
@@ -394,11 +397,13 @@ async function compressImage(file: File): Promise<string> {
 
 function ImageInput({
   form,
+  initialImageUrl,
 }: {
   form: UseFormReturn<FormInput, unknown, FormValues>;
+  initialImageUrl: string | null;
 }) {
   const { t } = useTranslation();
-  const [preview, setPreview] = useState<string | null>(form.getValues("image") ?? null);
+  const [preview, setPreview] = useState<string | null>(initialImageUrl);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -414,6 +419,7 @@ function ImageInput({
     try {
       const dataUrl = await compressImage(file);
       form.setValue("image", dataUrl, { shouldDirty: true });
+      form.setValue("imageRemoved", false);
       setPreview(dataUrl);
     } catch {
       alert(t("medicine.image_size_error"));
@@ -422,6 +428,7 @@ function ImageInput({
 
   const handleClearImage = () => {
     form.setValue("image", undefined, { shouldDirty: true });
+    form.setValue("imageRemoved", true);
     setPreview(null);
   };
 

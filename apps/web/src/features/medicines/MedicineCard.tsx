@@ -45,9 +45,9 @@ export function MedicineCard({ medicine }: { medicine: Medicine }) {
     >
       <span className={`absolute inset-y-3 left-0 w-1 rounded-r-full ${accentBar}`} aria-hidden />
 
-      {medicine.image && (
+      {medicine.imageUrl && (
         <img
-          src={medicine.image}
+          src={medicine.imageUrl}
           alt={medicine.name}
           className="h-20 w-20 shrink-0 rounded-2xl bg-canvas-soft object-contain"
         />

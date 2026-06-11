@@ -23,10 +23,11 @@ export interface Medicine {
   isExpired: boolean;
   isOpened: boolean;
   quantity: number;
+  remainingQuantity?: number;
   unit: string;
   dosePerDay?: number | null;
   notes?: string | null;
-  image?: string | null;
+  imageUrl?: string | null;
   archivedAt?: string | null;
   useCases: UseCaseTag[];
 }

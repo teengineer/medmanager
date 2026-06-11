@@ -123,7 +123,8 @@
     "scan_capture_analyzing": "Analyzing photo…",
     "scan_capture_failed": "Could not read a code from the photo — frame the code and try again.",
     "scan_start": "Start Scanning",
-    "scan_start_hint": "The camera opens and scanning starts when you press the button."
+    "scan_start_hint": "The camera opens and scanning starts when you press the button.",
+    "remaining": "Remaining"
   },
   "check": {
     "title": "Check at the doctor",

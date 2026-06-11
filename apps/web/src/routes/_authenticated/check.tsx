@@ -210,7 +210,7 @@ function CheckPage() {
                     <svg viewBox="0 0 24 24" className="size-3.5 text-mute" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round" />
                     </svg>
-                    {t("medicine.quantity")}: <strong className="font-semibold text-ink">{m.quantity} {m.unit}</strong>
+                    {t("medicine.remaining")}: <strong className="font-semibold text-ink">{m.remainingQuantity ?? m.quantity} {m.unit}</strong>
                   </p>
                 </button>
               ))}
@@ -265,7 +265,7 @@ function CheckPage() {
                     <svg viewBox="0 0 24 24" className="size-3.5 text-mute" fill="none" stroke="currentColor" strokeWidth="1.8">
                       <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round" />
                     </svg>
-                    {t("medicine.quantity")}: <strong className="font-semibold text-ink">{m.quantity} {m.unit}</strong>
+                    {t("medicine.remaining")}: <strong className="font-semibold text-ink">{m.remainingQuantity ?? m.quantity} {m.unit}</strong>
                   </p>
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-brand opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100">
                     <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -314,10 +314,10 @@ function FullscreenCard({ medicine, onClose }: { medicine: Medicine; onClose: ()
           </div>
           <div className="surface-card p-4 text-center">
             <p className="text-xs font-medium uppercase tracking-wider text-mute">
-              {t("medicine.quantity")}
+              {t("medicine.remaining")}
             </p>
             <p className="mt-1 text-xl font-bold text-ink">
-              {medicine.quantity} {medicine.unit}
+              {medicine.remainingQuantity ?? medicine.quantity} {medicine.unit}
             </p>
           </div>
         </div>
