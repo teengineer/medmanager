@@ -19,13 +19,23 @@ interface ExtendedCapabilities extends MediaTrackCapabilities {
  * Opens the camera at high resolution and exposes a digital zoom slider so
  * small codes can be read without moving inside the lens' focus distance.
  */
+interface CanvasDecoder {
+  decodeFromCanvas(canvas: HTMLCanvasElement): { getText(): string };
+}
+
 export function BarcodeScanner({ onResult, onClose }: Props) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
+  const readerRef = useRef<CanvasDecoder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number | null>(null);
   const [zoomCaps, setZoomCaps] = useState<{ min: number; max: number; step: number } | null>(null);
+  const [captureReady, setCaptureReady] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [captureFailed, setCaptureFailed] = useState(false);
+  // Camera stays off until the user explicitly starts scanning.
+  const [phase, setPhase] = useState<"idle" | "scanning">("idle");
 
   // Keep latest callbacks in refs so the effect runs exactly once.
   const onResultRef = useRef(onResult);
@@ -34,6 +44,15 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
   onCloseRef.current = onClose;
 
   useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseRef.current();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "scanning") return;
     let stopped = false;
     let controls: { stop: () => void } | null = null;
 
@@ -50,6 +69,7 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
         ]);
         hints.set(DecodeHintType.TRY_HARDER, true);
         const reader = new BrowserMultiFormatReader(hints);
+        readerRef.current = reader;
 
         if (stopped || !videoRef.current) return;
         // High resolution lets zxing resolve small DataMatrix codes from a
@@ -108,17 +128,74 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
       }
     })();
 
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCloseRef.current();
-    };
-    document.addEventListener("keydown", onKey);
+    // If continuous scanning hasn't succeeded within 3s, offer a photo capture.
+    const captureTimer = setTimeout(() => setCaptureReady(true), 3000);
 
     return () => {
       stopped = true;
       controls?.stop();
-      document.removeEventListener("keydown", onKey);
+      clearTimeout(captureTimer);
     };
-  }, [t]);
+  }, [phase, t]);
+
+  const handleCapture = () => {
+    const video = videoRef.current;
+    const reader = readerRef.current;
+    if (!video || !reader || !video.videoWidth) return;
+    setAnalyzing(true);
+    setCaptureFailed(false);
+
+    // Defer so the "analyzing" state paints before the sync decode work.
+    setTimeout(() => {
+      try {
+        const attempts: HTMLCanvasElement[] = [];
+
+        // 1) Full frame at native camera resolution
+        const full = document.createElement("canvas");
+        full.width = video.videoWidth;
+        full.height = video.videoHeight;
+        full.getContext("2d")?.drawImage(video, 0, 0);
+        attempts.push(full);
+
+        // 2) Center crop (the guide-frame area) upscaled 2× — helps tiny codes
+        const side = Math.floor(Math.min(video.videoWidth, video.videoHeight) * 0.6);
+        const crop = document.createElement("canvas");
+        crop.width = side * 2;
+        crop.height = side * 2;
+        crop
+          .getContext("2d")
+          ?.drawImage(
+            video,
+            (video.videoWidth - side) / 2,
+            (video.videoHeight - side) / 2,
+            side,
+            side,
+            0,
+            0,
+            side * 2,
+            side * 2,
+          );
+        attempts.push(crop);
+
+        for (const canvas of attempts) {
+          try {
+            const result = reader.decodeFromCanvas(canvas);
+            const parsed = parseScannedCode(result.getText());
+            if (parsed.gtin || parsed.expiryDate) {
+              setAnalyzing(false);
+              onResultRef.current(parsed);
+              return;
+            }
+          } catch {
+            // not found in this attempt — try the next one
+          }
+        }
+        setCaptureFailed(true);
+      } finally {
+        setAnalyzing(false);
+      }
+    }, 30);
+  };
 
   const applyZoom = (value: number) => {
     setZoom(value);
@@ -156,6 +233,17 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
         <div className="relative mx-5 overflow-hidden rounded-2xl bg-ink">
           {error ? (
             <p className="px-4 py-10 text-center text-sm text-white/80">{error}</p>
+          ) : phase === "idle" ? (
+            <div className="flex aspect-square w-full flex-col items-center justify-center gap-4 p-6">
+              <svg viewBox="0 0 24 24" className="size-12 text-white/70" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2" strokeLinecap="round" />
+                <path d="M7 12h2m2 0h2m2 0h2" strokeLinecap="round" />
+              </svg>
+              <button type="button" onClick={() => setPhase("scanning")} className="btn-primary text-sm">
+                {t("medicine.scan_start")}
+              </button>
+              <p className="text-center text-xs text-white/60">{t("medicine.scan_start_hint")}</p>
+            </div>
           ) : (
             <>
               <video ref={videoRef} muted playsInline className="aspect-square w-full object-cover" />
@@ -187,6 +275,28 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
             </>
           )}
         </div>
+
+        {!error && captureReady && (
+          <div className="px-5 pt-4">
+            <button
+              type="button"
+              onClick={handleCapture}
+              disabled={analyzing}
+              className="btn-primary w-full text-sm"
+            >
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M4 8a2 2 0 012-2h1.2a2 2 0 001.6-.8l.9-1.2a2 2 0 011.6-.8h1.4a2 2 0 011.6.8l.9 1.2a2 2 0 001.6.8H18a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V8z" />
+                <circle cx="12" cy="12.5" r="3.2" />
+              </svg>
+              {analyzing ? t("medicine.scan_capture_analyzing") : t("medicine.scan_capture_button")}
+            </button>
+            {captureFailed && (
+              <p className="mt-2 text-center text-xs text-amber-700">
+                {t("medicine.scan_capture_failed")}
+              </p>
+            )}
+          </div>
+        )}
 
         <p className="px-5 py-4 text-center text-sm text-mute">{t("medicine.scan_hint")}</p>
       </div>

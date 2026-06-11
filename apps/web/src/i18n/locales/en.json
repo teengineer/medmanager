@@ -118,7 +118,12 @@
     "scan_product_loading": "Looking up product info…",
     "scan_product_found": "{{name}} found — details filled in.",
     "scan_product_not_found": "Product not found in the TİTCK list — enter details manually.",
-    "scan_zoom": "Zoom"
+    "scan_zoom": "Zoom",
+    "scan_capture_button": "Take a photo & decode",
+    "scan_capture_analyzing": "Analyzing photo…",
+    "scan_capture_failed": "Could not read a code from the photo — frame the code and try again.",
+    "scan_start": "Start Scanning",
+    "scan_start_hint": "The camera opens and scanning starts when you press the button."
   },
   "check": {
     "title": "Check at the doctor",
