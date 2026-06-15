@@ -56,6 +56,7 @@ export const Route = createFileRoute("/api/medicines/$id/")({
         if (body.quantity !== undefined) patch.quantity = String(body.quantity);
         if (body.unit !== undefined) patch.unit = body.unit.trim();
         if (body.packageCount !== undefined) patch.packageCount = body.packageCount;
+        if (body.consumed !== undefined) patch.consumed = body.consumed;
         if (body.dosePerDay !== undefined) patch.dosePerDay = body.dosePerDay ?? null;
         if (body.notes !== undefined) patch.notes = body.notes?.trim() || null;
         if (body.image !== undefined) patch.image = body.image ?? null;

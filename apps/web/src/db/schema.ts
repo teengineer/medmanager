@@ -104,6 +104,7 @@ export const medicines = pgTable(
     quantity: text("quantity").notNull().default("1"),
     unit: text("unit").notNull().default("unit"),
     packageCount: integer("package_count").notNull().default(1),
+    consumed: integer("consumed").notNull().default(0), // units already used out of quantity
     dosePerDay: integer("dose_per_day"),
     notes: text("notes"),
     image: text("image"),

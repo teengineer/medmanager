@@ -19,6 +19,7 @@ export const createSchema = z.object({
   quantity: z.number().min(0),
   unit: z.string().min(1).max(32),
   packageCount: z.number().int().min(0).optional(),
+  consumed: z.number().int().min(0).optional(),
   dosePerDay: z.number().int().positive().nullable().optional(),
   notes: z.string().max(1000).nullable().optional(),
   image: z.string().max(10_000_000).nullable().optional(),

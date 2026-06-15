@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { and, count, eq, getTableColumns, gt, inArray, isNotNull, like, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, gt, inArray, isNotNull, like, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "~/db";
-import { medicineUseCases, medicines, usageLogs, useCases } from "~/db/schema";
+import { medicineUseCases, medicines, useCases } from "~/db/schema";
 import { auth } from "~/lib/auth";
 import { localeFromUser } from "~/lib/locale";
 import { toMedicineDto } from "~/lib/medicines";
@@ -68,13 +68,6 @@ export const Route = createFileRoute("/api/search")({
 
         const medicineIds = rows.map((r) => r.medicine.id);
 
-        // Doses logged as "taken" reduce what's left in the box.
-        const takenRows = await db
-          .select({ medicineId: usageLogs.medicineId, taken: count() })
-          .from(usageLogs)
-          .where(and(inArray(usageLogs.medicineId, medicineIds), eq(usageLogs.taken, true)))
-          .groupBy(usageLogs.medicineId);
-        const takenByMedicine = new Map(takenRows.map((r) => [r.medicineId, r.taken]));
         const tagRows = await db
           .select({
             medicineId: medicineUseCases.medicineId,
@@ -96,14 +89,9 @@ export const Route = createFileRoute("/api/search")({
 
         const today = new Date().toISOString().slice(0, 10);
         const items = rows
-          .map((r) => {
-            const dto = toMedicineDto(r.medicine, byMedicine.get(r.medicine.id) ?? [], locale);
-            // usage logs are per-day; a "taken" day consumes dosePerDay units (default 1)
-            const takenDays = takenByMedicine.get(r.medicine.id) ?? 0;
-            const perDay = dto.dosePerDay && dto.dosePerDay > 0 ? dto.dosePerDay : 1;
-            return { ...dto, remainingQuantity: Math.max(0, dto.quantity - takenDays * perDay) };
-          })
-          .filter((d) => d.effectiveExpiry >= today)
+          // remainingQuantity (quantity − consumed) is computed inside toMedicineDto
+          .map((r) => toMedicineDto(r.medicine, byMedicine.get(r.medicine.id) ?? [], locale))
+          .filter((d) => d.effectiveExpiry >= today && d.remainingQuantity > 0)
           .sort((a, b) => a.effectiveExpiry.localeCompare(b.effectiveExpiry));
 
         return Response.json({ items });

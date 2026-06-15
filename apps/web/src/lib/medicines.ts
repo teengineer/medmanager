@@ -22,8 +22,10 @@ export interface MedicineDto {
   isExpired: boolean;
   isOpened: boolean;
   quantity: number;
-  /** quantity minus logged "taken" doses — present on search results */
-  remainingQuantity?: number;
+  /** units already used out of quantity */
+  consumed: number;
+  /** quantity minus consumed units — what's left in the box */
+  remainingQuantity: number;
   unit: string;
   /** how many packs/boxes the user has on hand */
   packageCount: number;
@@ -92,6 +94,8 @@ export function toMedicineDto(
     isExpired: days < 0,
     isOpened: Boolean(m.openedAt),
     quantity: Number(m.quantity),
+    consumed: m.consumed ?? 0,
+    remainingQuantity: Math.max(0, Number(m.quantity) - (m.consumed ?? 0)),
     unit: m.unit,
     packageCount: m.packageCount ?? 1,
     dosePerDay: m.dosePerDay ?? null,

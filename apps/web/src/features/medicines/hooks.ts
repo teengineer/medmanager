@@ -23,6 +23,7 @@ export interface Medicine {
   isExpired: boolean;
   isOpened: boolean;
   quantity: number;
+  consumed: number;
   remainingQuantity?: number;
   unit: string;
   packageCount: number;
@@ -58,6 +59,7 @@ export interface MedicineInput {
   quantity: number;
   unit: string;
   packageCount?: number;
+  consumed?: number;
   dosePerDay?: number | null;
   notes?: string;
   image?: string | null;

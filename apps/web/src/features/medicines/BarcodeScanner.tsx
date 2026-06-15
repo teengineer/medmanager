@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { parseScannedCode, type Gs1Result } from "./gs1";
+import { decodeImageDataWasm, preloadZxingWasm } from "./zxingWasm";
 
 interface Props {
   onResult: (result: Gs1Result) => void;
@@ -43,6 +44,24 @@ function getNativeDetectorCtor(): NativeDetectorCtor | null {
   return (globalThis as unknown as { BarcodeDetector?: NativeDetectorCtor }).BarcodeDetector ?? null;
 }
 
+/** Draw the current video frame into `canvas`, downscaled so its longest side
+ * is at most `maxSide`, and return its pixels for a wasm decode. */
+function frameToImageData(
+  video: HTMLVideoElement,
+  maxSide: number,
+  canvas: HTMLCanvasElement,
+): ImageData | null {
+  const longest = Math.max(video.videoWidth, video.videoHeight);
+  if (!longest) return null;
+  const scale = Math.min(1, maxSide / longest);
+  canvas.width = Math.round(video.videoWidth * scale);
+  canvas.height = Math.round(video.videoHeight * scale);
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  return ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
 export function BarcodeScanner({ onResult, onClose }: Props) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -77,6 +96,8 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
     let stopped = false;
     let controls: { stop: () => void } | null = null;
     let nativeTimer: ReturnType<typeof setInterval> | null = null;
+    let wasmTimer: ReturnType<typeof setInterval> | null = null;
+    const wasmCanvas = document.createElement("canvas");
 
     (async () => {
       try {
@@ -154,6 +175,40 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
           }
         }
 
+        // zxing-wasm (zxing-cpp) fallback — only when the native detector is
+        // missing (iOS Safari, older browsers). On Android the native path
+        // already reads DataMatrix instantly, so we skip the wasm CPU cost
+        // there entirely.
+        if (!Ctor) {
+          preloadZxingWasm();
+          let wasmBusy = false;
+          wasmTimer = setInterval(async () => {
+            const video = videoRef.current;
+            if (stopped || wasmBusy || !video || !video.videoWidth) return;
+            wasmBusy = true;
+            try {
+              const imageData = frameToImageData(video, 1280, wasmCanvas);
+              if (imageData) {
+                const text = await decodeImageDataWasm(imageData);
+                if (text && !stopped) {
+                  const parsed = parseScannedCode(text);
+                  if (parsed.gtin || parsed.expiryDate) {
+                    stopped = true;
+                    if (wasmTimer) clearInterval(wasmTimer);
+                    controls?.stop();
+                    onResultRef.current(parsed);
+                    return;
+                  }
+                }
+              }
+            } catch {
+              // wasm still warming up or no symbol in frame — retry next tick
+            } finally {
+              wasmBusy = false;
+            }
+          }, 400);
+        }
+
         // Post-setup: continuous autofocus + digital zoom where supported.
         const stream = videoRef.current?.srcObject as MediaStream | null;
         const track = stream?.getVideoTracks()[0] ?? null;
@@ -195,6 +250,7 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
       stopped = true;
       controls?.stop();
       if (nativeTimer) clearInterval(nativeTimer);
+      if (wasmTimer) clearInterval(wasmTimer);
       nativeDetectorRef.current = null;
       clearTimeout(captureTimer);
     };
@@ -239,7 +295,7 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
           );
         attempts.push(crop);
 
-        // Native detector first (best DataMatrix accuracy), zxing as fallback.
+        // Priority: native detector → zxing-wasm (zxing-cpp) → zxing-js.
         const nativeDetector = nativeDetectorRef.current;
         for (const canvas of attempts) {
           if (nativeDetector) {
@@ -254,7 +310,24 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
                 }
               }
             } catch {
-              // native detect failed for this canvas — fall through to zxing
+              // native detect failed for this canvas — fall through
+            }
+          }
+          if (!nativeDetector) {
+            try {
+              const ctx = canvas.getContext("2d", { willReadFrequently: true });
+              const imageData = ctx?.getImageData(0, 0, canvas.width, canvas.height);
+              const text = imageData ? await decodeImageDataWasm(imageData) : null;
+              if (text) {
+                const parsed = parseScannedCode(text);
+                if (parsed.gtin || parsed.expiryDate) {
+                  setAnalyzing(false);
+                  onResultRef.current(parsed);
+                  return;
+                }
+              }
+            } catch {
+              // wasm decode failed for this canvas — fall through to zxing-js
             }
           }
           try {

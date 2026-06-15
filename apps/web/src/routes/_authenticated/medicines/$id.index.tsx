@@ -1,14 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useDeleteMedicine,
   useMedicine,
   useOpenMedicine,
   useArchiveMedicine,
-  useUsageLogs,
-  useLogUsage,
-  useUnlogUsage,
+  useUpdateMedicine,
 } from "../../../features/medicines/hooks";
 import type { Medicine } from "../../../features/medicines/hooks";
 import { useProfiles } from "../../../features/profiles/hooks";
@@ -26,23 +23,7 @@ function MedicineDetailPage() {
   const open = useOpenMedicine();
   const del = useDeleteMedicine();
   const archive = useArchiveMedicine();
-  const computedDaysWindow = (() => {
-    const m = medicine.data;
-    if (!m) return 14;
-    // quantity is in units (tablets etc.) and dosePerDay is units/day,
-    // so days of supply = quantity / dosePerDay. Strength (mg) is irrelevant here.
-    if (m.dosePerDay && m.dosePerDay > 0) {
-      const qty = Number(m.quantity);
-      if (isFinite(qty) && qty > 0) {
-        return Math.min(Math.max(Math.ceil(qty / m.dosePerDay), 1), 90);
-      }
-    }
-    return 14;
-  })();
-  const usageLogs = useUsageLogs(id, computedDaysWindow);
-  const logUsage = useLogUsage(id);
-  const unlogUsage = useUnlogUsage(id);
-  const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const update = useUpdateMedicine(id);
 
   if (medicine.isLoading) {
     return <p className="p-6 text-mute">{t("common.loading")}</p>;
@@ -60,26 +41,17 @@ function MedicineDetailPage() {
   });
   const fmt = (isoDate: string) => dateFmt.format(new Date(isoDate));
 
-  const today = new Date().toISOString().slice(0, 10);
-
-  const days = Array.from({ length: computedDaysWindow }, (_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (computedDaysWindow - 1 - i));
-    return d.toISOString().slice(0, 10);
-  });
-
-  const logsByDate = new Map<string, { taken: boolean; count: number }>();
-  for (const log of usageLogs.data ?? []) {
-    logsByDate.set(log.date, { taken: log.taken, count: log.count });
-  }
-
-  function colorForDay(day: string) {
-    const log = logsByDate.get(day);
-    if (!log) return "bg-line";
-    return log.taken ? "bg-emerald-400" : "bg-brand-400";
-  }
-
-  const selectedLog = logsByDate.get(logDate);
+  // Stock model: `quantity` is the total in the box, `consumed` how many units
+  // are already used. We paint one circle per unit; the first `consumed` are
+  // filled. Remaining = quantity − consumed (also what the doctor-check shows).
+  const total = Math.max(0, Math.round(Number(m.quantity)) || 0);
+  const consumed = Math.min(total, Math.max(0, m.consumed ?? 0));
+  const remaining = total - consumed;
+  const setConsumed = (next: number) => {
+    const clamped = Math.min(total, Math.max(0, next));
+    if (clamped === consumed) return;
+    update.mutate({ consumed: clamped });
+  };
 
   return (
     <main className="mx-auto max-w-2xl p-4 pb-28">
@@ -205,69 +177,75 @@ function MedicineDetailPage() {
         </section>
       )}
 
-      {/* Usage log section */}
+      {/* Usage tracking — one circle per unit; filled = consumed */}
       <section className="surface-card mt-4 p-5">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-mute">
-          {t("medicine.usage_log")}
-        </h2>
-        <div className="flex flex-wrap gap-1.5 mb-4">
-          {days.map((day) => {
-            const log = logsByDate.get(day);
-            const count = log?.taken ? log.count : 0;
-            return (
-              <span
-                key={day}
-                className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold leading-none text-white ${colorForDay(day)}`}
-                title={count > 0 ? t("medicine.usage_times_on", { date: day, count }) : day}
-              >
-                {count > 1 ? count : ""}
-              </span>
-            );
-          })}
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-mute">
+            {t("medicine.usage_log")}
+          </h2>
+          <p className="text-sm text-ink-soft">
+            {t("medicine.remaining")}:{" "}
+            <strong className="font-semibold text-ink">{remaining}</strong> / {total} {m.unit}
+          </p>
         </div>
-        {!m.archivedAt && (
-          <div className="flex flex-col gap-3">
-            <label className="flex items-center gap-2 text-sm text-ink-soft">
-              <span className="font-medium">{t("medicine.usage_date")}</span>
-              <input
-                type="date"
-                value={logDate}
-                max={today}
-                onChange={(e) => setLogDate(e.target.value || today)}
-                className="input-base flex-1"
+
+        {total === 0 ? (
+          <p className="text-sm text-mute">{t("medicine.usage_no_quantity")}</p>
+        ) : total <= 120 ? (
+          <div className="mb-4 flex flex-wrap gap-1.5">
+            {Array.from({ length: total }, (_, i) => {
+              const used = i < consumed;
+              const target = i + 1 === consumed ? i : i + 1;
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  disabled={Boolean(m.archivedAt) || update.isPending}
+                  onClick={() => setConsumed(target)}
+                  aria-label={`${i + 1}`}
+                  title={`${i + 1}`}
+                  className={`size-5 rounded-full transition ${
+                    used ? "bg-brand-400 hover:bg-brand-dark" : "bg-line hover:bg-brand-100"
+                  } ${m.archivedAt ? "cursor-default" : "cursor-pointer"}`}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          // Too many units to draw individually — show a compact progress bar.
+          <div className="mb-4">
+            <div className="h-3 w-full overflow-hidden rounded-full bg-line">
+              <div
+                className="h-full rounded-full bg-brand-400 transition-all"
+                style={{ width: `${total ? (consumed / total) * 100 : 0}%` }}
               />
-            </label>
-            {selectedLog?.taken && selectedLog.count > 0 && (
-              <p className="text-xs font-medium text-emerald-700">
-                {t("medicine.usage_times_on", { date: logDate, count: selectedLog.count })}
-              </p>
-            )}
+            </div>
+            <p className="mt-2 text-xs text-mute">
+              {consumed} / {total} {m.unit}
+            </p>
+          </div>
+        )}
+
+        {!m.archivedAt && total > 0 && (
+          <>
             <div className="flex gap-2">
               <button
-                onClick={() => logUsage.mutate({ date: logDate, taken: true })}
-                disabled={logUsage.isPending}
-                className="btn-primary text-sm flex-1"
+                onClick={() => setConsumed(consumed + 1)}
+                disabled={remaining <= 0 || update.isPending}
+                className="btn-primary flex-1 text-sm disabled:opacity-50"
               >
                 {t("medicine.usage_taken")}
               </button>
               <button
-                onClick={() => logUsage.mutate({ date: logDate, taken: false })}
-                disabled={logUsage.isPending}
-                className="rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-50 flex-1"
+                onClick={() => setConsumed(consumed - 1)}
+                disabled={consumed <= 0 || update.isPending}
+                className="flex-1 rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-50 disabled:opacity-50"
               >
-                {t("medicine.usage_skipped")}
+                {t("medicine.usage_undo")}
               </button>
-              {selectedLog?.taken && selectedLog.count > 0 && (
-                <button
-                  onClick={() => unlogUsage.mutate({ date: logDate })}
-                  disabled={unlogUsage.isPending}
-                  className="rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-mute hover:bg-canvas-soft"
-                >
-                  {t("medicine.usage_undo")}
-                </button>
-              )}
             </div>
-          </div>
+            <p className="mt-3 text-xs text-mute">{t("medicine.usage_paint_hint")}</p>
+          </>
         )}
       </section>
 

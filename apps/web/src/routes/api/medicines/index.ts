@@ -80,6 +80,7 @@ export const Route = createFileRoute("/api/medicines/")({
             quantity: String(body.quantity),
             unit: body.unit.trim(),
             packageCount: body.packageCount ?? 1,
+            consumed: body.consumed ?? 0,
             dosePerDay: body.dosePerDay ?? null,
             notes: body.notes?.trim() || null,
             image: body.image ?? null,
