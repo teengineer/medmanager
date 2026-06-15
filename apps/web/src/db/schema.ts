@@ -103,6 +103,7 @@ export const medicines = pgTable(
     openedShelfLifeDays: integer("opened_shelf_life_days"),
     quantity: text("quantity").notNull().default("1"),
     unit: text("unit").notNull().default("unit"),
+    packageCount: integer("package_count").notNull().default(1),
     dosePerDay: integer("dose_per_day"),
     notes: text("notes"),
     image: text("image"),
@@ -177,6 +178,7 @@ export const usageLogs = pgTable(
     medicineId: text("medicine_id").notNull().references(() => medicines.id, { onDelete: "cascade" }),
     date: text("date").notNull(), // YYYY-MM-DD
     taken: boolean("taken").notNull(),
+    count: integer("count").notNull().default(1), // how many times taken that day
     notes: text("notes"),
     createdAt: text("created_at").notNull().$defaultFn(isoNow),
   },

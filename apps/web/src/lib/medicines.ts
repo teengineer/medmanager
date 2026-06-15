@@ -25,6 +25,8 @@ export interface MedicineDto {
   /** quantity minus logged "taken" doses — present on search results */
   remainingQuantity?: number;
   unit: string;
+  /** how many packs/boxes the user has on hand */
+  packageCount: number;
   dosePerDay: number | null;
   notes: string | null;
   /** Versioned URL of the photo (served by /api/medicines/:id/image) — base64 never travels in JSON. */
@@ -91,6 +93,7 @@ export function toMedicineDto(
     isOpened: Boolean(m.openedAt),
     quantity: Number(m.quantity),
     unit: m.unit,
+    packageCount: m.packageCount ?? 1,
     dosePerDay: m.dosePerDay ?? null,
     notes: m.notes,
     imageUrl:

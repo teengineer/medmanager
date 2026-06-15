@@ -79,6 +79,7 @@ export const Route = createFileRoute("/api/medicines/")({
             openedShelfLifeDays: body.openedShelfLifeDays ?? null,
             quantity: String(body.quantity),
             unit: body.unit.trim(),
+            packageCount: body.packageCount ?? 1,
             dosePerDay: body.dosePerDay ?? null,
             notes: body.notes?.trim() || null,
             image: body.image ?? null,

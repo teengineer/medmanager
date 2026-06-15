@@ -23,11 +23,32 @@ interface CanvasDecoder {
   decodeFromCanvas(canvas: HTMLCanvasElement): { getText(): string };
 }
 
+// Native Barcode Detection API — available on Android Chrome and decodes
+// GS1 DataMatrix far more reliably (and faster) than zxing's pure-JS engine.
+// Not yet in TS lib DOM types, so we declare the slice we use.
+interface NativeBarcode {
+  rawValue: string;
+  format: string;
+}
+interface NativeDetector {
+  detect(source: CanvasImageSource): Promise<NativeBarcode[]>;
+}
+interface NativeDetectorCtor {
+  new (opts?: { formats?: string[] }): NativeDetector;
+  getSupportedFormats?(): Promise<string[]>;
+}
+const NATIVE_FORMATS = ["data_matrix", "qr_code", "ean_13"];
+
+function getNativeDetectorCtor(): NativeDetectorCtor | null {
+  return (globalThis as unknown as { BarcodeDetector?: NativeDetectorCtor }).BarcodeDetector ?? null;
+}
+
 export function BarcodeScanner({ onResult, onClose }: Props) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const readerRef = useRef<CanvasDecoder | null>(null);
+  const nativeDetectorRef = useRef<NativeDetector | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [zoom, setZoom] = useState<number | null>(null);
   const [zoomCaps, setZoomCaps] = useState<{ min: number; max: number; step: number } | null>(null);
@@ -55,6 +76,7 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
     if (phase !== "scanning") return;
     let stopped = false;
     let controls: { stop: () => void } | null = null;
+    let nativeTimer: ReturnType<typeof setInterval> | null = null;
 
     (async () => {
       try {
@@ -93,6 +115,44 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
             onResultRef.current(parsed);
           },
         );
+
+        // Native detector (Android Chrome) runs in parallel on the same video
+        // stream — it reads DataMatrix far better than zxing, so whichever fires
+        // first wins. Falls through silently when the API is unavailable.
+        const Ctor = getNativeDetectorCtor();
+        if (Ctor) {
+          try {
+            const supported = (await Ctor.getSupportedFormats?.()) ?? null;
+            const formats = supported
+              ? NATIVE_FORMATS.filter((f) => supported.includes(f))
+              : NATIVE_FORMATS;
+            if (formats.length > 0) {
+              const detector = new Ctor({ formats });
+              nativeDetectorRef.current = detector;
+              nativeTimer = setInterval(async () => {
+                const video = videoRef.current;
+                if (stopped || !video || !video.videoWidth) return;
+                try {
+                  const codes = await detector.detect(video);
+                  for (const code of codes) {
+                    const parsed = parseScannedCode(code.rawValue);
+                    if (parsed.gtin || parsed.expiryDate) {
+                      stopped = true;
+                      if (nativeTimer) clearInterval(nativeTimer);
+                      controls?.stop();
+                      onResultRef.current(parsed);
+                      return;
+                    }
+                  }
+                } catch {
+                  // transient detect() failure (e.g. video not ready) — retry next tick
+                }
+              }, 250);
+            }
+          } catch {
+            // detector construction failed — zxing fallback already running
+          }
+        }
 
         // Post-setup: continuous autofocus + digital zoom where supported.
         const stream = videoRef.current?.srcObject as MediaStream | null;
@@ -134,6 +194,8 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
     return () => {
       stopped = true;
       controls?.stop();
+      if (nativeTimer) clearInterval(nativeTimer);
+      nativeDetectorRef.current = null;
       clearTimeout(captureTimer);
     };
   }, [phase, t]);
@@ -146,7 +208,7 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
     setCaptureFailed(false);
 
     // Defer so the "analyzing" state paints before the sync decode work.
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
         const attempts: HTMLCanvasElement[] = [];
 
@@ -177,7 +239,24 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
           );
         attempts.push(crop);
 
+        // Native detector first (best DataMatrix accuracy), zxing as fallback.
+        const nativeDetector = nativeDetectorRef.current;
         for (const canvas of attempts) {
+          if (nativeDetector) {
+            try {
+              const codes = await nativeDetector.detect(canvas);
+              for (const code of codes) {
+                const parsed = parseScannedCode(code.rawValue);
+                if (parsed.gtin || parsed.expiryDate) {
+                  setAnalyzing(false);
+                  onResultRef.current(parsed);
+                  return;
+                }
+              }
+            } catch {
+              // native detect failed for this canvas — fall through to zxing
+            }
+          }
           try {
             const result = reader.decodeFromCanvas(canvas);
             const parsed = parseScannedCode(result.getText());

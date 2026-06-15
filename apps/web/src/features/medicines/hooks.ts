@@ -25,6 +25,7 @@ export interface Medicine {
   quantity: number;
   remainingQuantity?: number;
   unit: string;
+  packageCount: number;
   dosePerDay?: number | null;
   notes?: string | null;
   imageUrl?: string | null;
@@ -56,6 +57,7 @@ export interface MedicineInput {
   openedShelfLifeDays?: number | null;
   quantity: number;
   unit: string;
+  packageCount?: number;
   dosePerDay?: number | null;
   notes?: string;
   image?: string | null;
@@ -164,6 +166,7 @@ export interface UsageLog {
   medicineId: string;
   date: string;
   taken: boolean;
+  count: number;
   notes: string | null;
   createdAt: string;
 }
@@ -182,6 +185,19 @@ export function useLogUsage(medicineId: string) {
     mutationFn: (input: { date: string; taken: boolean; notes?: string }) =>
       api<UsageLog>(`/medicines/${medicineId}/log-usage`, {
         method: "POST",
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["usage-logs", medicineId] }),
+  });
+}
+
+/** Decrement a day's "taken" count (e.g. user logged one extra by mistake). */
+export function useUnlogUsage(medicineId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { date: string }) =>
+      api<UsageLog | null>(`/medicines/${medicineId}/log-usage`, {
+        method: "DELETE",
         body: JSON.stringify(input),
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["usage-logs", medicineId] }),

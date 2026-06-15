@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useDeleteMedicine,
@@ -7,6 +8,7 @@ import {
   useArchiveMedicine,
   useUsageLogs,
   useLogUsage,
+  useUnlogUsage,
 } from "../../../features/medicines/hooks";
 import type { Medicine } from "../../../features/medicines/hooks";
 import { useProfiles } from "../../../features/profiles/hooks";
@@ -39,6 +41,8 @@ function MedicineDetailPage() {
   })();
   const usageLogs = useUsageLogs(id, computedDaysWindow);
   const logUsage = useLogUsage(id);
+  const unlogUsage = useUnlogUsage(id);
+  const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   if (medicine.isLoading) {
     return <p className="p-6 text-mute">{t("common.loading")}</p>;
@@ -64,15 +68,18 @@ function MedicineDetailPage() {
     return d.toISOString().slice(0, 10);
   });
 
-  const logsByDate = new Map<string, boolean>();
+  const logsByDate = new Map<string, { taken: boolean; count: number }>();
   for (const log of usageLogs.data ?? []) {
-    logsByDate.set(log.date, log.taken);
+    logsByDate.set(log.date, { taken: log.taken, count: log.count });
   }
 
   function colorForDay(day: string) {
-    if (!logsByDate.has(day)) return "bg-line";
-    return logsByDate.get(day) ? "bg-emerald-400" : "bg-brand-400";
+    const log = logsByDate.get(day);
+    if (!log) return "bg-line";
+    return log.taken ? "bg-emerald-400" : "bg-brand-400";
   }
+
+  const selectedLog = logsByDate.get(logDate);
 
   return (
     <main className="mx-auto max-w-2xl p-4 pb-28">
@@ -153,6 +160,10 @@ function MedicineDetailPage() {
       <section className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
         <InfoTile label={t("medicine.quantity")} value={`${m.quantity} ${m.unit}`} />
         <InfoTile
+          label={t("medicine.package_count")}
+          value={t("medicine.package_count_value", { count: m.packageCount })}
+        />
+        <InfoTile
           label={t("medicine.opened_at")}
           value={m.openedAt ? fmt(m.openedAt) : t("medicine.unopened_state")}
           tone={m.isOpened ? "default" : "muted"}
@@ -200,30 +211,62 @@ function MedicineDetailPage() {
           {t("medicine.usage_log")}
         </h2>
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {days.map((day) => (
-            <span
-              key={day}
-              className={`size-5 rounded-full ${colorForDay(day)}`}
-              title={day}
-            />
-          ))}
+          {days.map((day) => {
+            const log = logsByDate.get(day);
+            const count = log?.taken ? log.count : 0;
+            return (
+              <span
+                key={day}
+                className={`flex size-5 items-center justify-center rounded-full text-[10px] font-bold leading-none text-white ${colorForDay(day)}`}
+                title={count > 0 ? t("medicine.usage_times_on", { date: day, count }) : day}
+              >
+                {count > 1 ? count : ""}
+              </span>
+            );
+          })}
         </div>
         {!m.archivedAt && (
-          <div className="flex gap-2">
-            <button
-              onClick={() => logUsage.mutate({ date: today, taken: true })}
-              disabled={logUsage.isPending}
-              className="btn-primary text-sm flex-1"
-            >
-              {t("medicine.usage_taken")}
-            </button>
-            <button
-              onClick={() => logUsage.mutate({ date: today, taken: false })}
-              disabled={logUsage.isPending}
-              className="rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-50 flex-1"
-            >
-              {t("medicine.usage_skipped")}
-            </button>
+          <div className="flex flex-col gap-3">
+            <label className="flex items-center gap-2 text-sm text-ink-soft">
+              <span className="font-medium">{t("medicine.usage_date")}</span>
+              <input
+                type="date"
+                value={logDate}
+                max={today}
+                onChange={(e) => setLogDate(e.target.value || today)}
+                className="input-base flex-1"
+              />
+            </label>
+            {selectedLog?.taken && selectedLog.count > 0 && (
+              <p className="text-xs font-medium text-emerald-700">
+                {t("medicine.usage_times_on", { date: logDate, count: selectedLog.count })}
+              </p>
+            )}
+            <div className="flex gap-2">
+              <button
+                onClick={() => logUsage.mutate({ date: logDate, taken: true })}
+                disabled={logUsage.isPending}
+                className="btn-primary text-sm flex-1"
+              >
+                {t("medicine.usage_taken")}
+              </button>
+              <button
+                onClick={() => logUsage.mutate({ date: logDate, taken: false })}
+                disabled={logUsage.isPending}
+                className="rounded-full border border-brand-100 bg-white px-4 py-2 text-sm font-medium text-brand-dark hover:bg-brand-50 flex-1"
+              >
+                {t("medicine.usage_skipped")}
+              </button>
+              {selectedLog?.taken && selectedLog.count > 0 && (
+                <button
+                  onClick={() => unlogUsage.mutate({ date: logDate })}
+                  disabled={unlogUsage.isPending}
+                  className="rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-mute hover:bg-canvas-soft"
+                >
+                  {t("medicine.usage_undo")}
+                </button>
+              )}
+            </div>
           </div>
         )}
       </section>

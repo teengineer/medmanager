@@ -33,6 +33,7 @@ const schema = z.object({
     .optional(),
   quantity: z.coerce.number().min(0),
   unit: z.string().min(1).max(32),
+  packageCount: z.coerce.number().int().min(0),
   dosePerDay: z
     .union([z.string().length(0), z.coerce.number().int().positive()])
     .optional(),
@@ -114,6 +115,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       openedShelfLifeDays: initial?.openedShelfLifeDays ?? undefined,
       quantity: initial?.quantity ?? 1,
       unit: initial?.unit ?? "tablet",
+      packageCount: initial?.packageCount ?? 1,
       dosePerDay: initial?.dosePerDay ?? undefined,
       notes: initial?.notes ?? "",
       image: undefined, // only set when the user picks a new photo
@@ -136,6 +138,7 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         typeof values.openedShelfLifeDays === "number" ? values.openedShelfLifeDays : null,
       quantity: values.quantity,
       unit: values.unit,
+      packageCount: values.packageCount,
       dosePerDay: typeof values.dosePerDay === "number" ? values.dosePerDay : null,
       notes: values.notes || undefined,
       // tri-state: new photo → send it; removed → null; untouched → undefined (PATCH keeps existing)
@@ -229,6 +232,17 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         </Field>
       </div>
 
+      <Field label={t("medicine.package_count")}>
+        <input
+          type="number"
+          min="0"
+          step="1"
+          className={inputCls}
+          placeholder={t("medicine.package_count_hint")}
+          {...form.register("packageCount")}
+        />
+      </Field>
+
       <Field label={t("medicine.dose_per_day")}>
         <input
           type="number"
@@ -263,6 +277,41 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
           <p className="text-sm text-mute">{t("common.loading")}</p>
         ) : (
           <div className="flex flex-col gap-2">
+            {(() => {
+              const selectedIds = form.watch("useCaseIds");
+              if (selectedIds.length === 0) return null;
+              const byId = new Map((useCases.data ?? []).map((uc) => [uc.id, uc]));
+              return (
+                <div className="flex flex-wrap gap-2">
+                  {selectedIds.map((id) => {
+                    const uc = byId.get(id);
+                    if (!uc) return null;
+                    return (
+                      <span
+                        key={id}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-brand-light px-3 py-1 text-sm font-medium text-brand-dark"
+                      >
+                        {uc.name}
+                        <button
+                          type="button"
+                          aria-label={t("common.remove")}
+                          onClick={() =>
+                            form.setValue(
+                              "useCaseIds",
+                              form.getValues("useCaseIds").filter((x) => x !== id),
+                              { shouldDirty: true },
+                            )
+                          }
+                          className="text-brand-dark/60 hover:text-brand-dark"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+              );
+            })()}
             <input
               type="text"
               value={query}
