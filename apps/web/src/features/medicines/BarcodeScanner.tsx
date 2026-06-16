@@ -62,6 +62,36 @@ function frameToImageData(
   return ctx.getImageData(0, 0, canvas.width, canvas.height);
 }
 
+/** Crop the centre `fraction` of the frame (the guide-box area) at native
+ * resolution and return its pixels. Small DataMatrix codes survive far better
+ * here than in a whole-frame downscale — critical on iOS Safari where zxing-wasm
+ * is the only decoder. */
+function centerCropImageData(
+  video: HTMLVideoElement,
+  fraction: number,
+  canvas: HTMLCanvasElement,
+): ImageData | null {
+  if (!video.videoWidth) return null;
+  const side = Math.floor(Math.min(video.videoWidth, video.videoHeight) * fraction);
+  if (!side) return null;
+  canvas.width = side;
+  canvas.height = side;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.drawImage(
+    video,
+    (video.videoWidth - side) / 2,
+    (video.videoHeight - side) / 2,
+    side,
+    side,
+    0,
+    0,
+    side,
+    side,
+  );
+  return ctx.getImageData(0, 0, canvas.width, canvas.height);
+}
+
 export function BarcodeScanner({ onResult, onClose }: Props) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -74,6 +104,8 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
   const [captureReady, setCaptureReady] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [captureFailed, setCaptureFailed] = useState(false);
+  const [manualCode, setManualCode] = useState("");
+  const [manualError, setManualError] = useState(false);
   // Camera stays off until the user explicitly starts scanning.
   const [phase, setPhase] = useState<"idle" | "scanning">("idle");
 
@@ -182,12 +214,21 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
         if (!Ctor) {
           preloadZxingWasm();
           let wasmBusy = false;
+          let tick = 0;
           wasmTimer = setInterval(async () => {
             const video = videoRef.current;
             if (stopped || wasmBusy || !video || !video.videoWidth) return;
             wasmBusy = true;
             try {
-              const imageData = frameToImageData(video, 1280, wasmCanvas);
+              // Alternate: even ticks read the centre guide-box crop at native
+              // resolution (best for small DataMatrix), odd ticks read the whole
+              // downscaled frame (catches codes outside the box). The crop is the
+              // one that actually rescues tiny İTS karekods on iOS Safari.
+              const imageData =
+                tick % 2 === 0
+                  ? centerCropImageData(video, 0.6, wasmCanvas)
+                  : frameToImageData(video, 1280, wasmCanvas);
+              tick += 1;
               if (imageData) {
                 const text = await decodeImageDataWasm(imageData);
                 if (text && !stopped) {
@@ -349,6 +390,23 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
     }, 30);
   };
 
+  // Manual fallback: the user types the human-readable barcode (the (01) line
+  // above the karekod) when the camera can't decode the DataMatrix. We feed it
+  // through the same parser so the parent's GTIN lookup runs identically.
+  const handleManualSubmit = () => {
+    const digits = manualCode.replace(/\D/g, "");
+    if (digits.length < 12 || digits.length > 14) {
+      setManualError(true);
+      return;
+    }
+    const parsed = parseScannedCode(digits);
+    if (!parsed.gtin) {
+      setManualError(true);
+      return;
+    }
+    onResultRef.current(parsed);
+  };
+
   const applyZoom = (value: number) => {
     setZoom(value);
     trackRef.current
@@ -447,6 +505,45 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
                 {t("medicine.scan_capture_failed")}
               </p>
             )}
+
+            <div className="mt-4 border-t border-line pt-4">
+              <label className="flex flex-col gap-1.5">
+                <span className="text-sm font-medium text-ink-soft">
+                  {t("medicine.scan_manual_label")}
+                </span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={manualCode}
+                    onChange={(e) => {
+                      setManualCode(e.target.value);
+                      setManualError(false);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleManualSubmit();
+                      }
+                    }}
+                    placeholder={t("medicine.scan_manual_placeholder")}
+                    className="input-base"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleManualSubmit}
+                    disabled={!manualCode.trim()}
+                    className="btn-secondary shrink-0 whitespace-nowrap text-sm"
+                  >
+                    {t("medicine.scan_manual_submit")}
+                  </button>
+                </div>
+              </label>
+              <p className="mt-1.5 text-xs text-mute">{t("medicine.scan_manual_hint")}</p>
+              {manualError && (
+                <p className="mt-1 text-xs text-red-600">{t("medicine.scan_manual_invalid")}</p>
+              )}
+            </div>
           </div>
         )}
 

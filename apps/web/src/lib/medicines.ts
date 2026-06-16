@@ -95,7 +95,10 @@ export function toMedicineDto(
     isOpened: Boolean(m.openedAt),
     quantity: Number(m.quantity),
     consumed: m.consumed ?? 0,
-    remainingQuantity: Math.max(0, Number(m.quantity) - (m.consumed ?? 0)),
+    remainingQuantity: Math.max(
+      0,
+      Number(m.quantity) * (m.packageCount ?? 1) - (m.consumed ?? 0),
+    ),
     unit: m.unit,
     packageCount: m.packageCount ?? 1,
     dosePerDay: m.dosePerDay ?? null,

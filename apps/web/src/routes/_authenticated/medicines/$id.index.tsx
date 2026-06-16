@@ -41,10 +41,13 @@ function MedicineDetailPage() {
   });
   const fmt = (isoDate: string) => dateFmt.format(new Date(isoDate));
 
-  // Stock model: `quantity` is the total in the box, `consumed` how many units
-  // are already used. We paint one circle per unit; the first `consumed` are
-  // filled. Remaining = quantity − consumed (also what the doctor-check shows).
-  const total = Math.max(0, Math.round(Number(m.quantity)) || 0);
+  // Stock model: `quantity` is the units in a single box, `packageCount` how
+  // many boxes are on hand, `consumed` how many units are already used. Total
+  // units = quantity × packageCount. We paint one circle per unit; the first
+  // `consumed` are filled. Remaining = total − consumed (the doctor-check value).
+  const perBox = Math.max(0, Math.round(Number(m.quantity)) || 0);
+  const boxes = Math.max(1, Math.round(m.packageCount ?? 1) || 1);
+  const total = perBox * boxes;
   const consumed = Math.min(total, Math.max(0, m.consumed ?? 0));
   const remaining = total - consumed;
   const setConsumed = (next: number) => {
