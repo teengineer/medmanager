@@ -1,4 +1,4 @@
-import { boolean, index, integer, pgTable, primaryKey, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, primaryKey, real, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 const isoNow = () => new Date().toISOString();
 
@@ -105,7 +105,7 @@ export const medicines = pgTable(
     unit: text("unit").notNull().default("unit"),
     packageCount: integer("package_count").notNull().default(1),
     consumed: integer("consumed").notNull().default(0), // units already used out of quantity
-    dosePerDay: integer("dose_per_day"),
+    dosePerDay: real("dose_per_day"), // fractional doses allowed, e.g. 2.5/day
     notes: text("notes"),
     image: text("image"),
     archivedAt: text("archived_at"),

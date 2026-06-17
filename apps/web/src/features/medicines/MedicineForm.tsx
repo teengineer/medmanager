@@ -43,7 +43,7 @@ const schema = z.object({
   unit: z.string().min(1).max(32),
   packageCount: z.coerce.number().int().min(0),
   dosePerDay: z
-    .union([z.string().length(0), z.coerce.number().int().positive()])
+    .union([z.string().length(0), z.coerce.number().positive()])
     .optional(),
   notes: z.string().optional(),
   image: z.string().optional(),
@@ -351,7 +351,8 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       <Field label={t("medicine.dose_per_day")}>
         <input
           type="number"
-          min="1"
+          min="0.5"
+          step="0.5"
           className={inputCls}
           placeholder={t("medicine.dose_per_day_hint")}
           {...form.register("dosePerDay")}

@@ -1,0 +1,1 @@
+ALTER TABLE "medicines" ALTER COLUMN "dose_per_day" SET DATA TYPE real;

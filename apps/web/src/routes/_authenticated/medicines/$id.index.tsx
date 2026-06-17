@@ -131,7 +131,7 @@ function MedicineDetailPage() {
         )}
         {m.imageUrl && lightboxOpen && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4 backdrop-blur-sm animate-pop"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 animate-pop"
             onClick={() => setLightboxOpen(false)}
             role="dialog"
             aria-modal="true"
@@ -140,7 +140,7 @@ function MedicineDetailPage() {
             <button
               type="button"
               onClick={() => setLightboxOpen(false)}
-              className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+              className="absolute right-4 top-4 z-10 flex size-10 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
               aria-label={t("common.cancel")}
             >
               <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -151,7 +151,7 @@ function MedicineDetailPage() {
               src={m.imageUrl}
               alt={m.name}
               onClick={(e) => e.stopPropagation()}
-              className="max-h-[90vh] max-w-full rounded-2xl object-contain"
+              className="max-h-screen max-w-full object-contain"
             />
           </div>
         )}
