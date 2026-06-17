@@ -22,7 +22,7 @@ export interface Gs1Result {
   raw: string;
 }
 
-function yymmddToIso(v: string): string | undefined {
+export function yymmddToIso(v: string): string | undefined {
   if (!/^\d{6}$/.test(v)) return undefined;
   const yy = parseInt(v.slice(0, 2), 10);
   const mm = parseInt(v.slice(2, 4), 10);

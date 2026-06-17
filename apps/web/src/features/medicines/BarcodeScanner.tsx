@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { parseScannedCode, type Gs1Result } from "./gs1";
+import { ocrGs1FromCanvas } from "./ocr";
 import { decodeImageDataWasm, preloadZxingWasm } from "./zxingWasm";
 
 interface Props {
@@ -106,6 +107,8 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
   const [captureFailed, setCaptureFailed] = useState(false);
   const [manualCode, setManualCode] = useState("");
   const [manualError, setManualError] = useState(false);
+  const [ocrBusy, setOcrBusy] = useState(false);
+  const [ocrFailed, setOcrFailed] = useState(false);
   // Camera stays off until the user explicitly starts scanning.
   const [phase, setPhase] = useState<"idle" | "scanning">("idle");
 
@@ -390,6 +393,37 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
     }, 30);
   };
 
+  // OCR fallback: when the DataMatrix won't decode, read the *printed* GS1 lines
+  // (the (01)/(17) text beside the karekod) with tesseract.js and feed the result
+  // through the same parent lookup as a normal scan.
+  const handleOcr = () => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth) return;
+    setOcrBusy(true);
+    setOcrFailed(false);
+    setTimeout(async () => {
+      try {
+        // Full frame at native resolution — the printed digits are tiny, so we
+        // keep every pixel rather than downscaling.
+        const full = document.createElement("canvas");
+        full.width = video.videoWidth;
+        full.height = video.videoHeight;
+        full.getContext("2d")?.drawImage(video, 0, 0);
+
+        const parsed = await ocrGs1FromCanvas(full);
+        if (parsed && (parsed.gtin || parsed.expiryDate)) {
+          onResultRef.current(parsed);
+          return;
+        }
+        setOcrFailed(true);
+      } catch {
+        setOcrFailed(true);
+      } finally {
+        setOcrBusy(false);
+      }
+    }, 30);
+  };
+
   // Manual fallback: the user types the human-readable barcode (the (01) line
   // above the karekod) when the camera can't decode the DataMatrix. We feed it
   // through the same parser so the parent's GTIN lookup runs identically.
@@ -503,6 +537,24 @@ export function BarcodeScanner({ onResult, onClose }: Props) {
             {captureFailed && (
               <p className="mt-2 text-center text-xs text-amber-700">
                 {t("medicine.scan_capture_failed")}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleOcr}
+              disabled={ocrBusy}
+              className="btn-secondary mt-2 w-full text-sm"
+            >
+              <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M4 7V5a1 1 0 011-1h2M17 4h2a1 1 0 011 1v2M20 17v2a1 1 0 01-1 1h-2M7 20H5a1 1 0 01-1-1v-2" strokeLinecap="round" />
+                <path d="M8 9h2m4 0h2M8 12h8M8 15h5" strokeLinecap="round" />
+              </svg>
+              {ocrBusy ? t("medicine.scan_ocr_analyzing") : t("medicine.scan_ocr_button")}
+            </button>
+            {ocrFailed && (
+              <p className="mt-2 text-center text-xs text-amber-700">
+                {t("medicine.scan_ocr_failed")}
               </p>
             )}
 
