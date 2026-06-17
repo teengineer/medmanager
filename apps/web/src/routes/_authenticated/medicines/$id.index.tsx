@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   useDeleteMedicine,
@@ -24,6 +25,7 @@ function MedicineDetailPage() {
   const del = useDeleteMedicine();
   const archive = useArchiveMedicine();
   const update = useUpdateMedicine(id);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (medicine.isLoading) {
     return <p className="p-6 text-mute">{t("common.loading")}</p>;
@@ -110,13 +112,46 @@ function MedicineDetailPage() {
           <StatusBadge status={status} medicine={m} />
         </div>
 
-        {/* Image */}
+        {/* Image — tap to open fullscreen */}
         {m.imageUrl && (
           <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(true)}
+              className="block w-full cursor-zoom-in overflow-hidden rounded-2xl"
+              aria-label={t("medicine.image_open")}
+            >
+              <img
+                src={m.imageUrl}
+                alt={m.name}
+                className="h-40 w-full rounded-2xl object-contain transition hover:opacity-90"
+              />
+            </button>
+          </div>
+        )}
+        {m.imageUrl && lightboxOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-ink/80 p-4 backdrop-blur-sm animate-pop"
+            onClick={() => setLightboxOpen(false)}
+            role="dialog"
+            aria-modal="true"
+            aria-label={m.name}
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(false)}
+              className="absolute right-4 top-4 flex size-10 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25"
+              aria-label={t("common.cancel")}
+            >
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" />
+              </svg>
+            </button>
             <img
               src={m.imageUrl}
               alt={m.name}
-              className="h-40 w-full rounded-2xl object-contain"
+              onClick={(e) => e.stopPropagation()}
+              className="max-h-[90vh] max-w-full rounded-2xl object-contain"
             />
           </div>
         )}

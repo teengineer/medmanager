@@ -7,7 +7,15 @@ import { api } from "../../lib/api/client";
 import { useProfiles } from "../profiles/hooks";
 import { BarcodeScanner } from "./BarcodeScanner";
 import type { Gs1Result } from "./gs1";
-import { useCreateUseCase, useUseCases, type Medicine, type MedicineInput } from "./hooks";
+import {
+  useContributeSupplement,
+  useCreateUseCase,
+  useSupplementSearch,
+  useUseCases,
+  type Medicine,
+  type MedicineInput,
+  type SupplementProduct,
+} from "./hooks";
 
 interface GtinLookup {
   found: boolean;
@@ -62,6 +70,10 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
   const [scannerOpen, setScannerOpen] = useState(false);
   const [scanInfo, setScanInfo] = useState<Gs1Result | null>(null);
   const [scanProduct, setScanProduct] = useState<"loading" | "not_found" | GtinLookup | null>(null);
+  const [isSupplement, setIsSupplement] = useState(false);
+  const [supplementMatch, setSupplementMatch] = useState<SupplementProduct | null>(null);
+  const [suppDismissed, setSuppDismissed] = useState(false);
+  const contributeSupplement = useContributeSupplement();
 
   const applyScan = async (res: Gs1Result) => {
     if (res.gtin) form.setValue("barcode", res.gtin, { shouldDirty: true });
@@ -97,6 +109,28 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
         }
       }
     } catch {
+      // Not in the TİTCK list — it may be a user-contributed supplement.
+      try {
+        const sup = await api<{ items: SupplementProduct[] }>(
+          `/supplements?barcode=${encodeURIComponent(res.gtin)}`,
+        );
+        const match = sup.items[0];
+        if (match) {
+          setIsSupplement(true);
+          setSupplementMatch(match);
+          setSuppDismissed(true);
+          if (!form.getValues("name")) {
+            form.setValue("name", match.name, { shouldDirty: true, shouldValidate: true });
+          }
+          if (match.form && !form.getValues("form")) {
+            form.setValue("form", match.form, { shouldDirty: true });
+          }
+          setScanProduct(null);
+          return;
+        }
+      } catch {
+        // supplement lookup failed — fall through to the manual-entry hint
+      }
       setScanProduct("not_found");
     }
   };
@@ -146,7 +180,33 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       useCaseIds: values.useCaseIds,
     };
     await onSubmit(input);
+    // Seed the shared supplement catalog so the next user can find this product.
+    if (isSupplement && values.name.trim()) {
+      contributeSupplement.mutate({
+        barcode: values.barcode?.trim() || null,
+        name: values.name.trim(),
+        form: values.form?.trim() || null,
+      });
+    }
   });
+
+  // Name autocomplete from the shared supplement catalog (only when flagged).
+  const nameValue = form.watch("name");
+  const suppSearch = useSupplementSearch(isSupplement ? nameValue : "");
+  const suppSuggestions =
+    isSupplement && !suppDismissed && nameValue.trim().length >= 2
+      ? (suppSearch.data ?? [])
+      : [];
+
+  const pickSupplement = (s: SupplementProduct) => {
+    form.setValue("name", s.name, { shouldDirty: true, shouldValidate: true });
+    if (s.form) form.setValue("form", s.form, { shouldDirty: true });
+    if (s.barcode && !form.getValues("barcode")) {
+      form.setValue("barcode", s.barcode, { shouldDirty: true });
+    }
+    setSupplementMatch(s);
+    setSuppDismissed(true);
+  };
 
   return (
     <form onSubmit={handle} className="flex flex-col gap-4">
@@ -165,8 +225,51 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
       )}
 
       <Field label={t("medicine.name")} error={form.formState.errors.name && t("common.required")}>
-        <input className={inputCls} {...form.register("name")} />
+        <div className="relative">
+          <input
+            className={inputCls}
+            autoComplete="off"
+            {...form.register("name", { onChange: () => setSuppDismissed(false) })}
+          />
+          {suppSuggestions.length > 0 && (
+            <ul className="absolute z-10 mt-1 max-h-44 w-full overflow-y-auto rounded-2xl border border-line bg-white shadow-pop">
+              {suppSuggestions.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => pickSupplement(s)}
+                    className="flex w-full flex-col items-start px-3 py-2 text-left text-sm hover:bg-canvas-soft"
+                  >
+                    <span className="font-medium text-ink">{s.name}</span>
+                    {s.form && <span className="text-xs text-mute">{s.form}</span>}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        {supplementMatch && (
+          <span className="text-xs font-medium text-emerald-700">
+            {t("medicine.supplement_found", { name: supplementMatch.name })}
+          </span>
+        )}
       </Field>
+
+      <label className="flex items-center gap-2.5 rounded-2xl border border-line bg-canvas-soft px-3 py-2.5">
+        <input
+          type="checkbox"
+          checked={isSupplement}
+          onChange={(e) => {
+            setIsSupplement(e.target.checked);
+            if (!e.target.checked) setSupplementMatch(null);
+          }}
+          className="size-4 accent-brand"
+        />
+        <span className="flex flex-col">
+          <span className="text-sm font-medium text-ink-soft">{t("medicine.is_supplement")}</span>
+          <span className="text-xs text-mute">{t("medicine.is_supplement_hint")}</span>
+        </span>
+      </label>
 
       <Field label={t("medicine.barcode")}>
         <div className="flex gap-2">
@@ -194,7 +297,9 @@ export function MedicineForm({ initial, submitLabel, onSubmit, pending }: Props)
           <span className="text-xs text-mute">{t("medicine.scan_product_loading")}</span>
         )}
         {scanProduct === "not_found" && (
-          <span className="text-xs text-amber-700">{t("medicine.scan_product_not_found")}</span>
+          <span className="text-xs text-amber-700">
+            {t("medicine.scan_product_not_found")} {t("medicine.scan_maybe_supplement")}
+          </span>
         )}
         {scanProduct && typeof scanProduct === "object" && (
           <span className="text-xs font-medium text-emerald-700">

@@ -139,6 +139,39 @@ export function useCreateUseCase() {
   });
 }
 
+export interface SupplementProduct {
+  id: string;
+  barcode: string | null;
+  name: string;
+  form: string | null;
+}
+
+/** Search the shared (user-contributed) supplement catalog by name. */
+export function useSupplementSearch(q: string) {
+  const query = q.trim();
+  return useQuery<SupplementProduct[]>({
+    queryKey: ["supplements", query],
+    queryFn: async () => {
+      const res = await api<{ items: SupplementProduct[] }>(
+        `/supplements?q=${encodeURIComponent(query)}`,
+      );
+      return res.items;
+    },
+    enabled: query.length >= 2,
+    staleTime: 60_000,
+  });
+}
+
+/** Add a supplement to the shared catalog so the next user can find it. */
+export function useContributeSupplement() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { barcode?: string | null; name: string; form?: string | null }) =>
+      api<SupplementProduct>("/supplements", { method: "POST", body: JSON.stringify(input) }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["supplements"] }),
+  });
+}
+
 export function useOpenMedicine() {
   const qc = useQueryClient();
   return useMutation({

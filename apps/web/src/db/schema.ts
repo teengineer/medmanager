@@ -218,6 +218,32 @@ export const drugProducts = pgTable("drug_products", {
   updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
 });
 
+// User-contributed dietary-supplement catalog. Supplements (takviye edici gıda)
+// are regulated as food (Tarım ve Orman Bakanlığı), carry no İTS karekod and are
+// absent from the TİTCK list — so there is no official barcode dataset to import.
+// Users build this shared lookup themselves: the first person to add a supplement
+// seeds it, everyone after can search and pick it.
+export const supplementProducts = pgTable(
+  "supplement_products",
+  {
+    id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+    barcode: text("barcode"), // EAN-13 retail barcode when known (nullable)
+    name: text("name").notNull(),
+    form: text("form"),
+    usageCount: integer("usage_count").notNull().default(1),
+    createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
+    createdAt: text("created_at").notNull().$defaultFn(isoNow),
+    updatedAt: text("updated_at").notNull().$defaultFn(isoNow),
+  },
+  (t) => ({
+    // Unique when present; Postgres treats NULLs as distinct so barcode-less
+    // supplements are still allowed.
+    barcodeIdx: uniqueIndex("supplement_products_barcode_unique").on(t.barcode),
+    nameIdx: index("supplement_products_name").on(t.name),
+  }),
+);
+export type SupplementProduct = typeof supplementProducts.$inferSelect;
+
 export type User = typeof user.$inferSelect;
 export type Medicine = typeof medicines.$inferSelect;
 export type UseCase = typeof useCases.$inferSelect;
